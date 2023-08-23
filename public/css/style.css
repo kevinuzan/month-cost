@@ -1,0 +1,71 @@
+.red-slashed {
+    background-color: rgba(255, 0, 0, 0.5);
+    text-decoration: line-through;
+}
+
+.orange-dif {
+    background-color: rgba(255, 166, 0, 0.5);
+}
+
+.green-missed {
+    background-color: rgba(0, 128, 0, 0.5);
+}
+
+
+
+label {
+    margin-bottom: 5px;
+}
+
+.container-3-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Cria 3 colunas com largura igual */
+    gap: 20px;
+    /* Espaçamento entre as colunas */
+
+    /* Responsivo: 2 colunas em telas menores */
+    @media screen and (max-width: 750px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    ;
+
+    /* Responsivo: 1 coluna em telas ainda menores */
+    @media screen and (max-width: 480px) {
+        grid-template-columns: 1fr;
+    }
+
+    ;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+
+.column {
+    text-align: center;
+}
+
+.custom-table th,
+.custom-table td {
+    padding: 0;
+    min-width: 200px;
+    max-width: 200px;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    margin-top: 0;
+    /* Cor de fundo para o cabeçalho fixo */
+    z-index: 1;
+    /* Certifica-se de que o cabeçalho fique acima do conteúdo da tabela */
+}
+
+
+.custom-table-container {
+    max-height: 200px;
+    /* Defina a altura máxima da tabela aqui */
+    overflow-y: auto;
+    /* Adiciona uma barra de rolagem vertical se o conteúdo exceder a altura máxima */
+}

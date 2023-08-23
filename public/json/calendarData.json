@@ -1,0 +1,64 @@
+[
+    {
+        "date": "8/2/2023",
+        "title": "Crédito",
+        "value": [
+            {
+                "nome": "Salário",
+                "valor": "4300,00"
+            }
+        ]
+    },
+    {
+        "date": "8/2/2023",
+        "title": "Débito",
+        "value": [
+            {
+                "nome": "Aluguel",
+                "valor": "1862,00"
+            },
+            {
+                "nome": "Internet",
+                "valor": "200,00"
+            }
+        ]
+    },
+    {
+        "date": "8/3/2023",
+        "title": "Crédito",
+        "value": [
+            {
+                "nome": "teste",
+                "valor": "123456"
+            },
+            {
+                "nome": "teste2",
+                "valor": "123456"
+            }
+        ]
+    },
+    {
+        "date": "8/3/2023",
+        "title": "Débito",
+        "value": [
+            {
+                "nome": "Cartão",
+                "valor": "1500,00"
+            }
+        ]
+    },
+    {
+        "date": "8/5/2023",
+        "title": "Débito",
+        "value": [
+            {
+                "nome": "teste",
+                "valor": "123456"
+            },
+            {
+                "nome": "teste2",
+                "valor": "123456"
+            }
+        ]
+    }
+]
