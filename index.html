@@ -118,22 +118,33 @@
                 </div>
 
                 <div id="newEventModal">
-                    <h2>New Event</h2>
+                    <h2 id="eventToADD"></h2>
+                    <div class="form-group">
+                        <label for="nameToADD">Nome</label>
+                        <input id="nameToADD" />
+                    </div>
 
-                    <input id="eventTitleInput" placeholder="Event Title" />
-
-                    <button id="saveButton">Save</button>
-                    <button id="cancelButton">Cancel</button>
+                    <div class="form-group">
+                        <label for="valueToADD">Valor</label>
+                        <input id="valueToADD" />
+                    </div>
+                    <div class="form-group">
+                        <button id="addButton">Add</button>
+                        <button id="cancelButton">Cancelar</button>
+                    </div>
                 </div>
 
                 <div id="deleteEventModal">
-                    <h2>Event</h2>
+                    <h2 id="tipoDado"></h2>
+                    <button id="plusBotao">
+                        <i class="fa-solid fa-circle-plus"></i>
+                    </button>
 
                     <p id="eventText"></p>
                     <p id="valueText"></p>
-<!-- 
+                    <!-- 
                     <button id="deleteButton">Delete</button> -->
-                    <button id="closeButton">Close</button>
+                    <button id="closeButton">Fechar</button>
                 </div>
 
                 <div id="modalBackDrop"></div>

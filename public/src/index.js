@@ -163,14 +163,14 @@ const calendar = document.getElementById('calendar');
 const newEventModal = document.getElementById('newEventModal');
 const deleteEventModal = document.getElementById('deleteEventModal');
 const backDrop = document.getElementById('modalBackDrop');
-const eventTitleInput = document.getElementById('eventTitleInput');
 const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function openModal(date, title) {
     clicked = date;
     const eventForDay = events.find(e => e.date === clicked && e.title == title);
     if (eventForDay) {
-        document.getElementById('eventText').innerText = eventForDay.title;
+        document.getElementById('eventText').innerText = '';
+        document.getElementById('tipoDado').innerText = eventForDay.title;
         var newString = ''
         for (i = 0; i < eventForDay.value.length; i++) {
             newString = `${newString}${eventForDay.value[i].nome}: \tR$ ${eventForDay.value[i].valor}\n`
@@ -282,40 +282,20 @@ function load() {
 }
 
 function closeModal() {
-    eventTitleInput.classList.remove('error');
     newEventModal.style.display = 'none';
     deleteEventModal.style.display = 'none';
     backDrop.style.display = 'none';
-    eventTitleInput.value = '';
     clicked = null;
     //load();
 }
 
-async function saveEvent() {
-    if (eventTitleInput.value) {
-        eventTitleInput.classList.remove('error');
-
-        events.push({
-            date: clicked,
-            title: eventTitleInput.value,
-        });
-
-        //console.log(JSON.stringify(events))
-        var valueDespesas = `/changeJsonCalendar?name=${JSON.stringify(events)}`;
-        const resultado = await fetchGet(valueDespesas);
-
-
-        closeModal();
-    } else {
-        eventTitleInput.classList.add('error');
-    }
-}
-
-async function deleteEvent() {
-    events = events.filter(e => e.date !== clicked);
-    var valueDespesas = `/changeJsonCalendar?name=${JSON.stringify(events)}`;
-    const resultado = await fetchGet(valueDespesas);
+var dataToAdd = ''
+async function addEvent() {
+    dataToAdd = document.getElementById('tipoDado').innerText
     closeModal();
+    newEventModal.style.display = 'block';
+    backDrop.style.display = 'block';
+    document.getElementById('eventToADD').innerText = dataToAdd
 }
 
 function initButtons() {
@@ -329,9 +309,8 @@ function initButtons() {
         load();
     });
 
-    document.getElementById('saveButton').addEventListener('click', saveEvent);
     document.getElementById('cancelButton').addEventListener('click', closeModal);
-    // document.getElementById('deleteButton').addEventListener('click', deleteEvent);
+    document.getElementById('plusBotao').addEventListener('click', addEvent);
     document.getElementById('closeButton').addEventListener('click', closeModal);
 }
 

@@ -4,6 +4,7 @@ body {
   justify-content: center;
   background-color: #FFFCFF;
 }
+
 button {
   width: 75px;
   cursor: pointer;
@@ -23,27 +24,33 @@ button {
   display: flex;
   justify-content: space-between;
 }
+
 #header button {
-  background-color:#003cff;
+  background-color: #003cff;
 }
+
 #container {
   width: 770px;
 }
+
 #weekdays {
   width: 100%;
   display: flex;
   color: #247BA0;
 }
+
 #weekdays div {
   width: 110px;
   padding: 10px;
 }
+
 #calendar {
   width: 100%;
   margin: auto;
   display: flex;
   flex-wrap: wrap;
 }
+
 .day {
   width: 100px;
   padding: 10px;
@@ -57,13 +64,15 @@ button {
   flex-direction: column;
   justify-content: space-between;
 }
+
 .day:hover {
   background-color: #e8faed;
 }
 
-.day + #currentDay {
-  background-color:#e8f4fa;
+.day+#currentDay {
+  background-color: #e8f4fa;
 }
+
 .event {
   font-size: 10px;
   padding: 3px;
@@ -73,12 +82,15 @@ button {
   max-height: 55px;
   overflow: hidden;
 }
+
 .padding {
   cursor: default !important;
   background-color: #FFFCFF !important;
   box-shadow: none !important;
 }
-#newEventModal, #deleteEventModal {
+
+#newEventModal,
+#deleteEventModal {
   display: none;
   z-index: 20;
   padding: 25px;
@@ -91,6 +103,7 @@ button {
   position: absolute;
   font-family: sans-serif;
 }
+
 #eventTitleInput {
   padding: 10px;
   width: 100%;
@@ -101,18 +114,25 @@ button {
   border: none;
   box-shadow: 0px 0px 3px gray;
 }
+
 #eventTitleInput.error {
   border: 2px solid red;
 }
-#cancelButton, #deleteButton {
+
+#cancelButton,
+#deleteButton {
   background-color: #d36c6c;
 }
-#saveButton, #closeButton {
+
+#addButton,
+#closeButton {
   background-color: #92a1d1;
 }
+
 #eventText {
   font-size: 14px;
 }
+
 #modalBackDrop {
   display: none;
   top: 0px;
@@ -121,5 +141,34 @@ button {
   width: 100vw;
   height: 100vh;
   position: absolute;
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+#plusBotao {
+  position: absolute;
+  top: 50%;
+  /* Alinha verticalmente no meio da div */
+  right: 10px;
+  /* Define a distância da direita */
+  transform: translateY(-50%);
+  /* Ajusta para centralizar verticalmente */
+  background-color: transparent;
+  border: none;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
+.form-group {
+  display: inline-block;
+  margin-right: 20px;
+  vertical-align: top;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  display: block;
 }
