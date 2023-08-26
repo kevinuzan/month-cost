@@ -168,14 +168,22 @@ const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 function openModal(date, title) {
     clicked = date;
     const eventForDay = events.find(e => e.date === clicked && e.title == title);
+
     if (eventForDay) {
-        document.getElementById('eventText').innerText = '';
-        document.getElementById('tipoDado').innerText = eventForDay.title;
-        var newString = ''
-        for (i = 0; i < eventForDay.value.length; i++) {
-            newString = `${newString}${eventForDay.value[i].nome}: \tR$ ${eventForDay.value[i].valor}\n`
+        if (title == 'Saldo') {
+            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${date}`;
+            document.getElementById('valueText').innerText = Number(eventForDay.value[0].credito.toString().replaceAll(',', '.')) - Number(eventForDay.value[0].debito.toString().replaceAll(',', '.'))
+            document.getElementById('plusBotao').style.visibility = 'hidden'
+        } else {
+            document.getElementById('plusBotao').style.visibility = 'visible'
+            document.getElementById('eventText').innerText = '';
+            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${date}`;
+            var newString = ''
+            for (i = 0; i < eventForDay.value.length; i++) {
+                newString = `${newString}${eventForDay.value[i].nome}: \tR$ ${eventForDay.value[i].valor}\n`
+            }
+            document.getElementById('valueText').innerText = newString;
         }
-        document.getElementById('valueText').innerText = newString;
         deleteEventModal.style.display = 'block';
     } else {
         newEventModal.style.display = 'block';
@@ -215,7 +223,7 @@ function load() {
 
     document.getElementById('monthDisplay').innerText =
         `${dt.toLocaleDateString('pt-br', { month: 'long' })} ${year}`;
-    
+
     const oldDate = new Date(year, month - 1, 1);
     const posDate = new Date(year, month + 1, 1);
 
@@ -254,7 +262,7 @@ function load() {
                     eventDiv.innerText = eventForDay[j].title;
                     if (eventForDay[j].title == 'Crédito') {
                         eventDiv.style.backgroundColor = 'green'
-                    } else {
+                    } else if (eventForDay[j].title == 'Débito') {
                         eventDiv.style.backgroundColor = 'red'
                     }
 
@@ -291,11 +299,71 @@ function closeModal() {
 
 var dataToAdd = ''
 async function addEvent() {
-    dataToAdd = document.getElementById('tipoDado').innerText
+    dataToAdd = `Add ${document.getElementById('tipoDado').innerText}`
+
     closeModal();
     newEventModal.style.display = 'block';
     backDrop.style.display = 'block';
     document.getElementById('eventToADD').innerText = dataToAdd
+}
+
+async function addValor() {
+    var typeToAdd = document.getElementById('eventToADD').innerText.split(' - ')[0].replace('Add ', '')
+    var dateToAdd = document.getElementById('eventToADD').innerText.split(' - ')[1]
+    var nameToAdd = document.getElementById('nameToADD').value
+    var valueToAdd = document.getElementById('valueToADD').value
+    // Novo objeto que você deseja adicionar
+    var novoObjeto = {
+        "nome": nameToAdd,
+        "valor": valueToAdd
+    };
+    // Crie um novo array com os objetos atualizados usando map
+    events = events.map(obj => {
+        if (obj.date === dateToAdd && obj.title === typeToAdd) {
+            if (obj.value.length === 1 && obj.value[0].nome === "" && obj.value[0].valor === "") {
+                // Substitui o valor existente
+                return {
+                    ...obj,
+                    value: [novoObjeto]
+                };
+            } else {
+                // Adiciona um novo valor à lista
+                return {
+                    ...obj,
+                    value: [...obj.value, novoObjeto]
+                };
+            }
+        }
+        return obj;
+    });
+    //console.log(events)
+    await saveJsonDataCalendar(events)
+//     var valueDespesas = `/changeJsonCalendar?name=${JSON.stringify(events)}`;
+//     const resultado = await fetchGet(valueDespesas);
+//     if (resultado == 'true') {
+//         alert('feito')
+//     } else { alert('malfeito') }
+}
+
+async function saveJsonDataCalendar(newData) {
+    // Supondo que 'newData' seja o JSON atualizado
+    var jsonData = JSON.stringify(newData);
+    console.log(jsonData)
+    // Enviar os dados para o servidor
+    await fetch('/salvar-json', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: jsonData
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Resposta do servidor:', data);
+        })
+        .catch(error => {
+            console.error('Erro ao enviar dados:', error);
+        });
 }
 
 function initButtons() {

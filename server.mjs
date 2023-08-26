@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import bodyParser from 'body-parser';
 
 var app = express();
 var server = createServer(app);
@@ -10,6 +11,9 @@ server.listen(process.env.PORT || 3000);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 app.use('/json', express.static(path.join(__dirname, 'public/json')));
@@ -60,8 +64,17 @@ function changeJson(newDataAppend, id) {
   }
 }
 
-app.get('/changeJsonCalendar', function (req, res) {
-  var newCalendarData = req.query.name;
-  fs.writeFileSync(path.join(__dirname + '/public/json/calendarData.json'), newCalendarData, 'utf8');
-  res.json('true')
+
+app.post('/salvar-json', (req, res) => {
+  const jsonData = req.body;
+  // Salvar o JSON em um arquivo
+  fs.writeFile(path.join(__dirname + '/public/json/calendarData.json'), JSON.stringify(jsonData, null, 2), 'utf8', (err) => {
+    if (err) {
+      console.error('Erro ao escrever o arquivo:', err);
+      res.status(500).json({ error: 'Erro ao salvar o arquivo.' });
+      return;
+    }
+    console.log('Arquivo atualizado com sucesso!');
+    res.json({ success: true });
+  });
 });
