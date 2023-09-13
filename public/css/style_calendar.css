@@ -144,6 +144,20 @@ button {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
+#editBotao {
+  position: absolute;
+  top: 50%;
+  /* Alinha verticalmente no meio da div */
+  right: 40px;
+  /* Define a distância da direita */
+  transform: translateY(-50%);
+  /* Ajusta para centralizar verticalmente */
+  background-color: transparent;
+  border: none;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
 #plusBotao {
   position: absolute;
   top: 50%;

@@ -168,21 +168,39 @@ const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 function openModal(date, title) {
     clicked = date;
     const eventForDay = events.find(e => e.date === clicked && e.title == title);
-
+    const eventForDayCred = events.find(e => e.date === clicked && e.title == 'Crédito');
+    var totalCredito = 0;
+    for (const item of eventForDayCred.value) {
+        const valor = parseFloat(item.valor);
+        totalCredito += valor;
+    }
+    const eventForDayDebi = events.find(e => e.date === clicked && e.title == 'Débito');
+    var totalDebito = 0;
+    for (const item of eventForDayDebi.value) {
+        const valor = parseFloat(item.valor);
+        totalDebito += valor;
+    }
+    if (!totalCredito) totalCredito = 0
+    if (!totalDebito) totalDebito = 0
+    var totalSaldo = totalCredito - totalDebito
     if (eventForDay) {
         if (title == 'Saldo') {
-            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${date}`;
-            document.getElementById('valueText').innerText = Number(eventForDay.value[0].credito.toString().replaceAll(',', '.')) - Number(eventForDay.value[0].debito.toString().replaceAll(',', '.'))
+            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${convertDateFormat(date)}`;
+            document.getElementById('valueText').innerText = `R$ ${totalSaldo}`;
             document.getElementById('plusBotao').style.visibility = 'hidden'
+            document.getElementById('editBotao').style.visibility = 'hidden'
+            
         } else {
             document.getElementById('plusBotao').style.visibility = 'visible'
+            document.getElementById('editBotao').style.visibility = 'visible'
             document.getElementById('eventText').innerText = '';
-            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${date}`;
+            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${convertDateFormat(date)}`;
             var newString = ''
             for (i = 0; i < eventForDay.value.length; i++) {
                 newString = `${newString}${eventForDay.value[i].nome}: \tR$ ${eventForDay.value[i].valor}\n`
             }
             document.getElementById('valueText').innerText = newString;
+
         }
         deleteEventModal.style.display = 'block';
     } else {
@@ -190,6 +208,54 @@ function openModal(date, title) {
     }
 
     backDrop.style.display = 'block';
+}
+
+
+async function editEvent(){
+    paragraph.contentEditable = true;
+    paragraph.focus()
+}
+
+const paragraph = document.getElementById('valueText');
+
+// paragraph.addEventListener('dblclick', () => {
+//     if (!(document.getElementById('tipoDado').innerText.indexOf('Saldo') >= 0)) {
+//         paragraph.contentEditable = true;
+//         paragraph.focus();
+//     }
+// });
+
+paragraph.addEventListener('blur', async () => {
+    paragraph.contentEditable = false;
+    await changeValueEdit()
+});
+
+async function changeValueEdit() {
+    console.log(paragraph.innerText)
+    var newValues = paragraph.innerText.split('\n');
+    var typeToAdd = document.getElementById('tipoDado').innerText.split(' - ')[0].replace('Add ', '')
+    var dateToAdd = await convertDateFormat(document.getElementById('tipoDado').innerText.split(' - ')[1]);
+    var newEndString = '['
+    var valorToSub = 1
+    if (newValues.length == 1) valorToSub = 0
+    for (i = 0; i < newValues.length - valorToSub; i++) {
+        newEndString += `{"nome": "${newValues[i].split(': ')[0]}","valor": "${newValues[i].split(': ')[1].replaceAll("R$ ", '').replaceAll("R$", '')}"},`
+    }
+    newEndString = newEndString.slice(0, -1)
+    newEndString += ']'
+    console.log(newEndString)
+    events = events.map(obj => {
+        if (obj.date.split('/')[1] === dateToAdd.split('/')[1] && obj.title === typeToAdd) {
+            // Substitui o valor existente
+            return {
+                ...obj,
+                value: JSON.parse(newEndString)
+            };
+        }
+        return obj;
+    });
+    //console.log(events)
+    await saveJsonDataCalendar(events)
 }
 
 function openModalNew(date) {
@@ -297,6 +363,7 @@ function closeModal() {
     //load();
 }
 
+
 var dataToAdd = ''
 async function addEvent() {
     dataToAdd = `Add ${document.getElementById('tipoDado').innerText}`
@@ -307,11 +374,22 @@ async function addEvent() {
     document.getElementById('eventToADD').innerText = dataToAdd
 }
 
+function convertDateFormat(dateString) {
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+        const newDateFormat = `${parts[1]}/${parts[0]}/${parts[2]}`;
+        return newDateFormat;
+    } else {
+        return dateString; // Retorna a data no formato original se não for possível converter
+    }
+}
+
 async function addValor() {
     var typeToAdd = document.getElementById('eventToADD').innerText.split(' - ')[0].replace('Add ', '')
-    var dateToAdd = document.getElementById('eventToADD').innerText.split(' - ')[1]
+    var dateToAdd = await convertDateFormat(document.getElementById('eventToADD').innerText.split(' - ')[1]);
     var nameToAdd = document.getElementById('nameToADD').value
     var valueToAdd = document.getElementById('valueToADD').value
+    var mensalAdd = document.getElementById('checkBoxSetMensal').value
     // Novo objeto que você deseja adicionar
     var novoObjeto = {
         "nome": nameToAdd,
@@ -319,36 +397,54 @@ async function addValor() {
     };
     // Crie um novo array com os objetos atualizados usando map
     events = events.map(obj => {
-        if (obj.date === dateToAdd && obj.title === typeToAdd) {
-            if (obj.value.length === 1 && obj.value[0].nome === "" && obj.value[0].valor === "") {
-                // Substitui o valor existente
-                return {
-                    ...obj,
-                    value: [novoObjeto]
-                };
-            } else {
-                // Adiciona um novo valor à lista
-                return {
-                    ...obj,
-                    value: [...obj.value, novoObjeto]
-                };
+        if (mensalAdd) {
+            if (obj.date.split('/')[1] === dateToAdd.split('/')[1] && obj.title === typeToAdd) {
+                if (obj.value.length === 1 && obj.value[0].nome === "" && obj.value[0].valor === "") {
+                    // Substitui o valor existente
+                    return {
+                        ...obj,
+                        value: [novoObjeto]
+                    };
+                } else {
+                    // Adiciona um novo valor à lista
+                    return {
+                        ...obj,
+                        value: [...obj.value, novoObjeto]
+                    };
+                }
+            }
+        }
+        else {
+            if (obj.date === dateToAdd && obj.title === typeToAdd) {
+                if (obj.value.length === 1 && obj.value[0].nome === "" && obj.value[0].valor === "") {
+                    // Substitui o valor existente
+                    return {
+                        ...obj,
+                        value: [novoObjeto]
+                    };
+                } else {
+                    // Adiciona um novo valor à lista
+                    return {
+                        ...obj,
+                        value: [...obj.value, novoObjeto]
+                    };
+                }
             }
         }
         return obj;
     });
     //console.log(events)
     await saveJsonDataCalendar(events)
-//     var valueDespesas = `/changeJsonCalendar?name=${JSON.stringify(events)}`;
-//     const resultado = await fetchGet(valueDespesas);
-//     if (resultado == 'true') {
-//         alert('feito')
-//     } else { alert('malfeito') }
+    //     var valueDespesas = `/changeJsonCalendar?name=${JSON.stringify(events)}`;
+    //     const resultado = await fetchGet(valueDespesas);
+    //     if (resultado == 'true') {
+    //         alert('feito')
+    //     } else { alert('malfeito') }
 }
 
 async function saveJsonDataCalendar(newData) {
     // Supondo que 'newData' seja o JSON atualizado
     var jsonData = JSON.stringify(newData);
-    console.log(jsonData)
     // Enviar os dados para o servidor
     await fetch('/salvar-json', {
         method: 'POST',
@@ -379,6 +475,7 @@ function initButtons() {
 
     document.getElementById('cancelButton').addEventListener('click', closeModal);
     document.getElementById('plusBotao').addEventListener('click', addEvent);
+    document.getElementById('editBotao').addEventListener('click', editEvent);
     document.getElementById('closeButton').addEventListener('click', closeModal);
 }
 

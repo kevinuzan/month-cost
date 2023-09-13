@@ -5,7 +5,7 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "123"
+        "valor": "154"
       }
     ]
   },
@@ -16,6 +16,10 @@
       {
         "nome": "teste2",
         "valor": "12"
+      },
+      {
+        "nome": "teste",
+        "valor": "99"
       }
     ]
   },
@@ -34,8 +38,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "123"
       }
     ]
   },
@@ -934,8 +938,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "154"
       }
     ]
   },
@@ -944,8 +948,8 @@
     "title": "Débito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "99"
       }
     ]
   },
@@ -964,8 +968,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "123"
       }
     ]
   },
@@ -1864,8 +1868,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "154"
       }
     ]
   },
@@ -1874,8 +1878,8 @@
     "title": "Débito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "99"
       }
     ]
   },
@@ -1894,8 +1898,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "123"
       }
     ]
   },
@@ -2794,8 +2798,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "154"
       }
     ]
   },
@@ -2804,8 +2808,8 @@
     "title": "Débito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "99"
       }
     ]
   },
@@ -2824,8 +2828,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "123"
       }
     ]
   },
@@ -3724,8 +3728,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "154"
       }
     ]
   },
@@ -3734,8 +3738,8 @@
     "title": "Débito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "99"
       }
     ]
   },
@@ -3754,8 +3758,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "123"
       }
     ]
   },
@@ -4654,8 +4658,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "154"
       }
     ]
   },
@@ -4664,8 +4668,8 @@
     "title": "Débito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "99"
       }
     ]
   },
@@ -4684,8 +4688,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "teste",
+        "valor": "123"
       }
     ]
   },
