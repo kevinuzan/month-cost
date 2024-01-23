@@ -133,7 +133,7 @@
                         <label for="checkBoxSetMensal">Valor recorrente</label>
                     </div>
                     <div class="form-group">
-                        <button id="addButton" onclick="addValor()">Add</button>
+                        <button id="addButton" onclick="addValor(document.getElementById('eventToADD').innerText)">Add</button>
                         <button id="cancelButton">Cancelar</button>
                     </div>
                 </div>
@@ -147,8 +147,20 @@
                     <button id="editBotao">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
+
+                    <button id="plusBotaoDeb">
+                        <i class="fa-solid fa-circle-plus"></i>
+                    </button>
+
+                    <button id="editBotaoDeb">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
                     <p id="eventText"></p>
+                    <p id="valueText0" style="font-weight: bold;"></p>
                     <p id="valueText"></p>
+                    <p id="eventTextDeb"></p>
+                    <p id="valueTextDeb0" style="font-weight: bold;"></p>
+                    <p id="valueTextDeb"></p>
                     <!-- 
                     <button id="deleteButton">Delete</button> -->
                     <button id="closeButton">Fechar</button>

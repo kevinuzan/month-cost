@@ -166,17 +166,15 @@ const backDrop = document.getElementById('modalBackDrop');
 const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function openModal(date, title) {
-
     clicked = date;
     const eventForDay = events.find(e => e.date === clicked && e.title == title);
     const eventForDayCred = events.find(e => e.date === clicked && e.title == 'Crédito');
-    const eventForDayDebi = events.find(e => e.date === clicked && e.title == 'Débito');
-
     var totalCredito = 0;
     for (const item of eventForDayCred.value) {
         const valor = parseFloat(item.valor);
         totalCredito += valor;
     }
+    const eventForDayDebi = events.find(e => e.date === clicked && e.title == 'Débito');
     var totalDebito = 0;
     for (const item of eventForDayDebi.value) {
         const valor = parseFloat(item.valor);
@@ -185,43 +183,25 @@ function openModal(date, title) {
     if (!totalCredito) totalCredito = 0
     if (!totalDebito) totalDebito = 0
     var totalSaldo = totalCredito - totalDebito
-    var txtCredito = `Crédito: ${totalCredito.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}`
-    var txtDebito = `Débito: ${totalCredito.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}`
-    var txtSaldo = `Saldo: ${totalSaldo.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}`
     if (eventForDay) {
-        // if (title == 'Saldo') {
-        //     document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${convertDateFormat(date)}`;
-        //     document.getElementById('valueText').innerText = `R$ ${totalSaldo}`;
-        //     document.getElementById('plusBotao').style.visibility = 'hidden'
-        //     document.getElementById('editBotao').style.visibility = 'hidden'
-
-        // } else {
-        document.getElementById('plusBotao').style.visibility = 'visible'
-        document.getElementById('editBotao').style.visibility = 'visible'
-        document.getElementById('eventText').innerText = '';
-        document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${convertDateFormat(date)}`;
-        var newString = ''
-        for (i = 0; i < eventForDayCred.value.length; i++) {
-            if (eventForDayCred.value[i].nome != '') {
-                newString = `${newString}${eventForDayCred.value[i].nome}: \t ${parseFloat(eventForDayCred.value[i].valor).toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}\n`
-            } else {
-                newString = `${newString}R$ 0,00\n`
+        if (title == 'Saldo') {
+            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${convertDateFormat(date)}`;
+            document.getElementById('valueText').innerText = `R$ ${totalSaldo}`;
+            document.getElementById('plusBotao').style.visibility = 'hidden'
+            document.getElementById('editBotao').style.visibility = 'hidden'
+            
+        } else {
+            document.getElementById('plusBotao').style.visibility = 'visible'
+            document.getElementById('editBotao').style.visibility = 'visible'
+            document.getElementById('eventText').innerText = '';
+            document.getElementById('tipoDado').innerText = `${eventForDay.title} - ${convertDateFormat(date)}`;
+            var newString = ''
+            for (i = 0; i < eventForDay.value.length; i++) {
+                newString = `${newString}${eventForDay.value[i].nome}: \tR$ ${eventForDay.value[i].valor}\n`
             }
-        }
-        document.getElementById('valueText0').innerText = 'Crédito';
-        document.getElementById('valueText').innerText = newString;
-        newString = ''
-        for (j = 0; j < eventForDayDebi.value.length; j++) {
-            if (eventForDayDebi.value[j].nome != '') {
-                newString = `${newString}${eventForDayDebi.value[j].nome}: \t ${parseFloat(eventForDayDebi.value[j].valor).toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}\n`
-            } else {
-                newString = `${newString}R$ 0,00`
-            }
-        }
-        document.getElementById('valueTextDeb0').innerText = 'Débito';
-        document.getElementById('valueTextDeb').innerText = newString;
+            document.getElementById('valueText').innerText = newString;
 
-        // }
+        }
         deleteEventModal.style.display = 'block';
     } else {
         newEventModal.style.display = 'block';
@@ -231,18 +211,13 @@ function openModal(date, title) {
 }
 
 
-async function editEvent() {
+async function editEvent(){
     paragraph.contentEditable = true;
     paragraph.focus()
 }
 
-async function editEventDeb() {
-    paragraphDeb.contentEditable = true;
-    paragraphDeb.focus()
-}
-
 const paragraph = document.getElementById('valueText');
-const paragraphDeb = document.getElementById('valueTextDeb');
+
 // paragraph.addEventListener('dblclick', () => {
 //     if (!(document.getElementById('tipoDado').innerText.indexOf('Saldo') >= 0)) {
 //         paragraph.contentEditable = true;
@@ -252,31 +227,25 @@ const paragraphDeb = document.getElementById('valueTextDeb');
 
 paragraph.addEventListener('blur', async () => {
     paragraph.contentEditable = false;
-    await changeValueEdit(paragraph, 'Crédito')
+    await changeValueEdit()
 });
 
-paragraphDeb.addEventListener('blur', async () => {
-    paragraphDeb.contentEditable = false;
-    await changeValueEdit(paragraphDeb, 'Débito')
-});
-
-async function changeValueEdit(paragraph, titulo) {
+async function changeValueEdit() {
     console.log(paragraph.innerText)
-    paragraph.innerText = paragraph.innerText.replaceAll(' ','').replaceAll(',','.');
     var newValues = paragraph.innerText.split('\n');
+    var typeToAdd = document.getElementById('tipoDado').innerText.split(' - ')[0].replace('Add ', '')
     var dateToAdd = await convertDateFormat(document.getElementById('tipoDado').innerText.split(' - ')[1]);
     var newEndString = '['
     var valorToSub = 1
     if (newValues.length == 1) valorToSub = 0
     for (i = 0; i < newValues.length - valorToSub; i++) {
-        console.log(newValues, newValues[i], newValues[i].split(':'))
-        newEndString += `{"nome": "${newValues[i].split(': ')[0]}","valor": "${newValues[i].split(':')[1].replaceAll("R$ ", '').replaceAll("R$", '')}"},`
+        newEndString += `{"nome": "${newValues[i].split(': ')[0]}","valor": "${newValues[i].split(': ')[1].replaceAll("R$ ", '').replaceAll("R$", '')}"},`
     }
     newEndString = newEndString.slice(0, -1)
     newEndString += ']'
     console.log(newEndString)
     events = events.map(obj => {
-        if (obj.date.split('/')[1] === dateToAdd.split('/')[1] && obj.title === titulo) {
+        if (obj.date.split('/')[1] === dateToAdd.split('/')[1] && obj.title === typeToAdd) {
             // Substitui o valor existente
             return {
                 ...obj,
@@ -287,7 +256,6 @@ async function changeValueEdit(paragraph, titulo) {
     });
     //console.log(events)
     await saveJsonDataCalendar(events)
-    load()
 }
 
 function openModalNew(date) {
@@ -341,63 +309,32 @@ function load() {
             daySquare.innerText = i - paddingDays;
             //const eventForDay = events.find(e => e.date === dayString);
             const eventForDay = events.filter(e => e.date === dayString);
-            console.log(eventForDay)
-            console.log(events)
+
             if (i - paddingDays === day && nav === 0) {
                 daySquare.id = 'currentDay';
             }
             if (eventForDay.length > 0) {
-                var listaCred = events.filter(e => e.date === dayString && e.title == 'Crédito')[0]
-                var listaDebi = events.filter(e => e.date === dayString && e.title == 'Débito')[0]
-                console.log(listaCred, listaDebi)
-                var totalCredito = 0;
-                for (const item of listaCred.value) {
-                    const valor = parseFloat(item.valor);
-                    totalCredito += valor;
-                }
-                var totalDebito = 0;
-                for (const item of listaDebi.value) {
-                    const valor = parseFloat(item.valor);
-                    totalDebito += valor;
-                }
-                if (!totalCredito) totalCredito = 0
-                if (!totalDebito) totalDebito = 0
-                var totalSaldo = totalCredito - totalDebito
-                var txtCredito = `Crédito: ${totalCredito.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}`
-                var txtDebito = `Débito: ${totalDebito.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}`
-                var txtSaldo = `Saldo\n  ${totalSaldo.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}`
-                const eventDiv = document.createElement('div');
-                eventDiv.classList.add('event');
-                eventDiv.innerText = txtSaldo;
-                if (totalSaldo >= 0){
-                    eventDiv.style.backgroundColor = '#D7FFE4'
-                } else {
-                    eventDiv.style.backgroundColor = '#F4CCCC'
-                }
-                daySquare.appendChild(eventDiv);
-                //daySquare.children[0].addEventListener('click', () => openModal(dayString, 'Saldo'));
-                daySquare.addEventListener('click', () => openModal(dayString, 'Saldo'));
-                // for (j = 0; j < eventForDay.length; j++) { //new
-                //     // const eventDiv = document.createElement('div');
-                //     // eventDiv.classList.add('event');
-                //     // eventDiv.innerText = eventForDay[j].title;
-                //     // daySquare.appendChild(eventDiv);
-                //     // daySquare.children[j].addEventListener('click', () => openModal(dayString, eventForDay[j].title));
-                //     // daySquare.addEventListener('click', () => openModalNew(dayString));
+                for (j = 0; j < eventForDay.length; j++) { //new
+                    // const eventDiv = document.createElement('div');
+                    // eventDiv.classList.add('event');
+                    // eventDiv.innerText = eventForDay[j].title;
+                    // daySquare.appendChild(eventDiv);
+                    // daySquare.children[j].addEventListener('click', () => openModal(dayString, eventForDay[j].title));
+                    // daySquare.addEventListener('click', () => openModalNew(dayString));
 
-                //     const eventDiv = document.createElement('button');
-                //     eventDiv.classList.add('event');
-                //     eventDiv.id = `${eventForDay[j].title.replaceAll(" ", "")}`
-                //     eventDiv.innerText = eventForDay[j].title;
-                //     if (eventForDay[j].title == 'Crédito') {
-                //         eventDiv.style.backgroundColor = 'green'
-                //     } else if (eventForDay[j].title == 'Débito') {
-                //         eventDiv.style.backgroundColor = 'red'
-                //     }
+                    const eventDiv = document.createElement('button');
+                    eventDiv.classList.add('event');
+                    eventDiv.id = `${eventForDay[j].title.replaceAll(" ", "")}`
+                    eventDiv.innerText = eventForDay[j].title;
+                    if (eventForDay[j].title == 'Crédito') {
+                        eventDiv.style.backgroundColor = 'green'
+                    } else if (eventForDay[j].title == 'Débito') {
+                        eventDiv.style.backgroundColor = 'red'
+                    }
 
-                //     eventDiv.addEventListener('click', () => openModal(dayString, eventDiv.innerText));
-                //     daySquare.appendChild(eventDiv);
-                // }
+                    eventDiv.addEventListener('click', () => openModal(dayString, eventDiv.innerText));
+                    daySquare.appendChild(eventDiv);
+                }
             } else {
                 //daySquare.addEventListener('click', () => openModalNew(dayString));
             }
@@ -429,17 +366,7 @@ function closeModal() {
 
 var dataToAdd = ''
 async function addEvent() {
-    dataToAdd = `Add - Crédito`
-
-    closeModal();
-    newEventModal.style.display = 'block';
-    backDrop.style.display = 'block';
-    document.getElementById('eventToADD').innerText = dataToAdd
-}
-
-var dataToAdd = ''
-async function addEventDeb() {
-    dataToAdd = `Add - Débito`
+    dataToAdd = `Add ${document.getElementById('tipoDado').innerText}`
 
     closeModal();
     newEventModal.style.display = 'block';
@@ -457,9 +384,9 @@ function convertDateFormat(dateString) {
     }
 }
 
-async function addValor(titleText) {
-    var typeToAdd = titleText.split(' - ')[0].replace('Add ', '')
-    var dateToAdd = await convertDateFormat(titleText.split(' - ')[1]);
+async function addValor() {
+    var typeToAdd = document.getElementById('eventToADD').innerText.split(' - ')[0].replace('Add ', '')
+    var dateToAdd = await convertDateFormat(document.getElementById('eventToADD').innerText.split(' - ')[1]);
     var nameToAdd = document.getElementById('nameToADD').value
     var valueToAdd = document.getElementById('valueToADD').value
     var mensalAdd = document.getElementById('checkBoxSetMensal').value
@@ -549,8 +476,6 @@ function initButtons() {
     document.getElementById('cancelButton').addEventListener('click', closeModal);
     document.getElementById('plusBotao').addEventListener('click', addEvent);
     document.getElementById('editBotao').addEventListener('click', editEvent);
-    document.getElementById('plusBotaoDeb').addEventListener('click', addEventDeb);
-    document.getElementById('editBotaoDeb').addEventListener('click', editEventDeb);
     document.getElementById('closeButton').addEventListener('click', closeModal);
 }
 

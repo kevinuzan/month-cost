@@ -74,13 +74,14 @@ button {
 }
 
 .event {
-  font-size: 10px;
+  font-size: 13px;
   padding: 3px;
-  background-color: #58bae4;
-  color: white;
+  /* background-color: #58bae4; */
+  color: rgb(0, 0, 0);
   border-radius: 5px;
   max-height: 55px;
   overflow: hidden;
+  font-weight: bold;
 }
 
 .padding {
@@ -161,6 +162,34 @@ button {
 #plusBotao {
   position: absolute;
   top: 50%;
+  /* Alinha verticalmente no meio da div */
+  right: 10px;
+  /* Define a distância da direita */
+  transform: translateY(-50%);
+  /* Ajusta para centralizar verticalmente */
+  background-color: transparent;
+  border: none;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
+#editBotaoDeb {
+  position: absolute;
+  top: 70%;
+  /* Alinha verticalmente no meio da div */
+  right: 40px;
+  /* Define a distância da direita */
+  transform: translateY(-50%);
+  /* Ajusta para centralizar verticalmente */
+  background-color: transparent;
+  border: none;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
+#plusBotaoDeb {
+  position: absolute;
+  top: 70%;
   /* Alinha verticalmente no meio da div */
   right: 10px;
   /* Define a distância da direita */

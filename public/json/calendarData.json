@@ -14,12 +14,8 @@
     "title": "Débito",
     "value": [
       {
-        "nome": "teste2",
-        "valor": "12"
-      },
-      {
         "nome": "teste",
-        "valor": "99"
+        "valor": " 154"
       }
     ]
   },
@@ -39,7 +35,11 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "123"
+        "valor": " 123.00"
+      },
+      {
+        "nome": "salario",
+        "valor": " 250.00"
       }
     ]
   },
@@ -58,8 +58,12 @@
     "title": "Saldo",
     "value": [
       {
-        "credito": "0",
-        "debito": "0"
+        "nome": "teste",
+        "valor": "  123,00"
+      },
+      {
+        "nome": "salario",
+        "valor": "  125"
       }
     ]
   },
@@ -68,8 +72,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "salario",
+        "valor": " 125"
       }
     ]
   },
@@ -949,7 +953,7 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "99"
+        "valor": " 154"
       }
     ]
   },
@@ -969,7 +973,11 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "123"
+        "valor": " 123.00"
+      },
+      {
+        "nome": "salario",
+        "valor": " 250.00"
       }
     ]
   },
@@ -988,8 +996,12 @@
     "title": "Saldo",
     "value": [
       {
-        "credito": "0",
-        "debito": "0"
+        "nome": "teste",
+        "valor": "  123,00"
+      },
+      {
+        "nome": "salario",
+        "valor": "  125"
       }
     ]
   },
@@ -998,8 +1010,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "salario",
+        "valor": " 125"
       }
     ]
   },
@@ -1879,7 +1891,7 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "99"
+        "valor": " 154"
       }
     ]
   },
@@ -1899,7 +1911,11 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "123"
+        "valor": " 123.00"
+      },
+      {
+        "nome": "salario",
+        "valor": " 250.00"
       }
     ]
   },
@@ -1918,8 +1934,12 @@
     "title": "Saldo",
     "value": [
       {
-        "credito": "0",
-        "debito": "0"
+        "nome": "teste",
+        "valor": "  123,00"
+      },
+      {
+        "nome": "salario",
+        "valor": "  125"
       }
     ]
   },
@@ -1928,8 +1948,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "salario",
+        "valor": " 125"
       }
     ]
   },
@@ -2809,7 +2829,7 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "99"
+        "valor": " 154"
       }
     ]
   },
@@ -2829,7 +2849,11 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "123"
+        "valor": " 123.00"
+      },
+      {
+        "nome": "salario",
+        "valor": " 250.00"
       }
     ]
   },
@@ -2848,8 +2872,12 @@
     "title": "Saldo",
     "value": [
       {
-        "credito": "0",
-        "debito": "0"
+        "nome": "teste",
+        "valor": "  123,00"
+      },
+      {
+        "nome": "salario",
+        "valor": "  125"
       }
     ]
   },
@@ -2858,8 +2886,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "salario",
+        "valor": " 125"
       }
     ]
   },
@@ -3739,7 +3767,7 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "99"
+        "valor": " 154"
       }
     ]
   },
@@ -3759,7 +3787,11 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "123"
+        "valor": " 123.00"
+      },
+      {
+        "nome": "salario",
+        "valor": " 250.00"
       }
     ]
   },
@@ -3778,8 +3810,12 @@
     "title": "Saldo",
     "value": [
       {
-        "credito": "0",
-        "debito": "0"
+        "nome": "teste",
+        "valor": "  123,00"
+      },
+      {
+        "nome": "salario",
+        "valor": "  125"
       }
     ]
   },
@@ -3788,8 +3824,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "salario",
+        "valor": " 125"
       }
     ]
   },
@@ -4669,7 +4705,7 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "99"
+        "valor": " 154"
       }
     ]
   },
@@ -4689,7 +4725,11 @@
     "value": [
       {
         "nome": "teste",
-        "valor": "123"
+        "valor": " 123.00"
+      },
+      {
+        "nome": "salario",
+        "valor": " 250.00"
       }
     ]
   },
@@ -4708,8 +4748,12 @@
     "title": "Saldo",
     "value": [
       {
-        "credito": "0",
-        "debito": "0"
+        "nome": "teste",
+        "valor": "  123,00"
+      },
+      {
+        "nome": "salario",
+        "valor": "  125"
       }
     ]
   },
@@ -4718,8 +4762,8 @@
     "title": "Crédito",
     "value": [
       {
-        "nome": "",
-        "valor": ""
+        "nome": "salario",
+        "valor": " 125"
       }
     ]
   },
