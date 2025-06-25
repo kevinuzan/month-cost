@@ -132,7 +132,7 @@ function gerarNumeroAlvo(numeros) {
                             if (isNaN(total)) break;
                         }
 
-                        if (!isNaN(total) && Number.isInteger(total) && total >= 0 && total <= 1000) {
+                        if (!isNaN(total) && Number.isInteger(total) && total >= 0 && total <= 100) {
                             expressõesPossíveis.push({ expr, result: total });
                         }
                     }
