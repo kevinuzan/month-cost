@@ -1,6 +1,8 @@
 let operacaoAtual = "";
 let numerosDisponiveis = [];
 let numeroAlvo = 0;
+let expressaoCorreta = "";
+let todasSolucoes = [];
 
 const socket = io();
 let souLider = false;
@@ -13,11 +15,13 @@ function sortearNumeros() {
     }
 
     numerosDisponiveis = [...sorteados];
-    gerarNumeroAlvo(numerosDisponiveis); // calcula o alvo antes de exibir
+    gerarNumeroAlvo(numerosDisponiveis);
     renderizarNumeros();
     operacaoAtual = "";
     atualizarOperacao();
     document.getElementById("resultado").textContent = "?";
+    document.getElementById("resposta-correta").textContent = "";
+    document.getElementById("todas-solucoes").innerHTML = "";
 }
 
 function renderizarNumeros() {
@@ -51,7 +55,6 @@ function calcular() {
         const tokens = operacaoAtual.match(/\d+|[+\-×÷]/g);
         if (!tokens) throw "expressão vazia";
 
-        // Resolvendo em ordem da esquerda pra direita (sem precedência)
         let total = parseInt(tokens[0]);
         for (let i = 1; i < tokens.length; i += 2) {
             const op = tokens[i];
@@ -75,16 +78,23 @@ function calcular() {
                 "❌ Errou. Uma resposta possível seria: " + expressaoCorreta + " = " + numeroAlvo;
         }
 
+        // Mostrar todas as soluções possíveis
+        const lista = document.getElementById("todas-solucoes");
+        lista.innerHTML = "";
+        todasSolucoes.forEach(expr => {
+            const li = document.createElement("li");
+            li.textContent = expr + " = " + numeroAlvo;
+            lista.appendChild(li);
+        });
+
     } catch (e) {
         document.getElementById("resultado").textContent = "Erro";
     }
 }
 
-let expressaoCorreta = "";
-
 function gerarNumeroAlvo(numeros) {
     const operadores = ["+", "-", "×", "÷"];
-    const expressõesPossíveis = [];
+    const expPossiveis = [];
 
     function permutacoes(arr) {
         if (arr.length <= 1) return [arr];
@@ -125,32 +135,40 @@ function gerarNumeroAlvo(numeros) {
                                 case "-": total -= val; break;
                                 case "×": total *= val; break;
                                 case "÷":
-                                    if (val === 0 || total % val !== 0) total = NaN;
-                                    else total /= val;
+                                    if (val === 0 || total % val !== 0) {
+                                        total = NaN;
+                                    } else {
+                                        total /= val;
+                                    }
                                     break;
                             }
                             if (isNaN(total)) break;
                         }
 
                         if (!isNaN(total) && Number.isInteger(total) && total >= 50 && total <= 100) {
-                            expressõesPossíveis.push({ expr, result: total });
+                            expPossiveis.push({ expr, result: total });
                         }
                     }
     }
 
-    if (expressõesPossíveis.length > 0) {
-        const escolhido = expressõesPossíveis[Math.floor(Math.random() * expressõesPossíveis.length)];
-        numeroAlvo = escolhido.result;
-        expressaoCorreta = escolhido.expr;
+    const filtradas = expPossiveis.filter(e => e.result);
+
+    if (filtradas.length > 0) {
+        const escolhida = filtradas[Math.floor(Math.random() * filtradas.length)];
+        numeroAlvo = escolhida.result;
+        expressaoCorreta = escolhida.expr;
         document.getElementById("alvo").textContent = numeroAlvo;
+
+        todasSolucoes = filtradas
+            .filter(e => e.result === numeroAlvo)
+            .map(e => e.expr);
     } else {
         numeroAlvo = 0;
         expressaoCorreta = "";
+        todasSolucoes = [];
         document.getElementById("alvo").textContent = "?";
     }
-
 }
-
 
 document.getElementById("sortear").addEventListener("click", sortearNumeros);
 
