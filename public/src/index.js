@@ -149,14 +149,6 @@ function gerarNumeroAlvo(numeros) {
         document.getElementById("alvo").textContent = "?";
     }
 
-    if (souLider) {
-        socket.emit("novaRodada", {
-            numeros: numerosDisponiveis,
-            alvo: numeroAlvo,
-            expressaoCorreta
-        });
-    }
-
 }
 
 
@@ -170,40 +162,3 @@ document.querySelectorAll(".operador").forEach((btn) => {
 });
 
 sortearNumeros();
-
-
-socket.on("definirLider", () => {
-    souLider = true;
-    document.getElementById("sortear").disabled = false;
-});
-
-socket.on("estadoAtual", (dados) => {
-    if (!souLider) {
-        renderizarNumerosExternos(dados.numeros);
-        numeroAlvo = dados.alvo;
-        expressaoCorreta = dados.expressaoCorreta;
-        document.getElementById("alvo").textContent = numeroAlvo;
-    }
-});
-
-socket.on("atualizarRodada", (dados) => {
-    if (!souLider) {
-        renderizarNumerosExternos(dados.numeros);
-        numeroAlvo = dados.alvo;
-        expressaoCorreta = dados.expressaoCorreta;
-        document.getElementById("alvo").textContent = numeroAlvo;
-    }
-});
-
-
-function renderizarNumerosExternos(numeros) {
-  const container = document.getElementById("numeros");
-  container.innerHTML = "";
-
-  numeros.forEach((n) => {
-    const div = document.createElement("div");
-    div.classList.add("numero");
-    div.textContent = n;
-    container.appendChild(div);
-  });
-}
