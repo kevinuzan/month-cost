@@ -8,7 +8,7 @@ let souLider = false;
 function sortearNumeros() {
     const sorteados = new Set();
     while (sorteados.size < 5) {
-        const num = Math.floor(Math.random() * 15);
+        const num = Math.floor(Math.random() * 14) + 1;
         sorteados.add(num);
     }
 
