@@ -1,232 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html;chartset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jogo Matemático</title>
+
+    <!-- Estilos -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet" />
-    <link href="/css/style_calendar.css" rel="stylesheet" />
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
+    <!-- Ícones -->
     <script src="https://kit.fontawesome.com/7113fe860c.js" crossorigin="anonymous"></script>
-    <title>Status Monetário</title>
 </head>
 
-<body onload="getJson()">
-    <div class="align-items-center">
+<body>
+    <div class="container text-center mt-5">
+        <h1 class="mb-4">Sorteio de Números (0 a 20)</h1>
+        <button id="sortear" class="btn btn-primary mb-4">Sortear Números</button>
+        <h4 class="mb-3">Número a alcançar: <span id="alvo" class="text-primary fw-bold">?</span></h4>
+        <div id="numeros" class="d-flex justify-content-center flex-wrap gap-3 mb-4"></div>
 
-        <ul class="nav nav-tabs justify-content-center">
-            <li class="active"><a data-toggle="tab" href="#resumo-tab-content">STATUS</a>
-            </li>
-            <li><a data-toggle="tab" href="#descritivo-tab-content">DESCRITIVO</a></li>
-            <li><a data-toggle="tab" href="#diario-tab-content">DIÁRIO</a></li>
-        </ul>
-        <div class="tab-content mt-4">
-            <div class="tab-pane fade in active" id="resumo-tab-content">
-                <div class="row justify-content-center" style="text-align: center">
-                    <h1 class="text-center">Status Mensal</h1>
-                </div>
-
-                <br />
-
-                <div class="mt-3 container-3-columns">
-                    <div class="mb-3 column">
-                        <label for="basic-url" class="form-label">Despesa</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="insertDespesas">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button"
-                                    onclick="addItem($('#insertDespesas')[0].value, this.id)"
-                                    id="despesasBtn">Add</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3 column custom-table-container">
-                        <table class="table custom-table" id="despesasTable">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Despesa</th>
-                                    <th scope="col">Valor R$</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="mt-3 container-3-columns">
-                    <div class="mb-3 column">
-                        <label for="basic-url" class="form-label">Renda</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="insertRendas">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button"
-                                    onclick="addItem($('#insertRendas')[0].value, this.id)" id="rendasBtn">Add</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3 column custom-table-container">
-                        <table class="table custom-table" id="rendasTable">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Renda</th>
-                                    <th scope="col">Valor R$</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap justify-content-center align-items-center mt-3">
-                    <div class="field-container mr-2">
-                        <div class="mt-3" id="resultado"
-                            style="max-width: 700px;overflow-wrap: break-word;white-space: normal;text-align: justify;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="descritivo-tab-content">
-                <div class="row justify-content-center" style="text-align: center">
-                    <h1 class="text-center">DESCRITIVO</h1>
-                </div>
-                <div id="container">
-                    <div id="header">
-                        <div id="monthDisplay" style="font-size: 26px;font-weight: bold;color: black;"></div>
-                        <div>
-                            <button id="backButton">Back</button>
-                            <button id="nextButton">Next</button>
-                        </div>
-                    </div>
-
-                    <div id="weekdays">
-                        <div>Domingo</div>
-                        <div>Segunda</div>
-                        <div>Terça</div>
-                        <div>Quarta</div>
-                        <div>Quinta</div>
-                        <div>Sexta</div>
-                        <div>Sábado</div>
-                    </div>
-
-                    <div id="calendar"></div>
-                </div>
-
-                <div id="newEventModal">
-                    <h2 id="eventToADD"></h2>
-                    <div class="form-group">
-                        <label for="nameToADD">Nome</label>
-                        <input id="nameToADD" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="valueToADD">Valor</label>
-                        <input id="valueToADD" />
-                    </div>
-                    <div class="form-group">
-                        <input id="checkBoxSetMensal" type="checkbox" />
-                        <label for="checkBoxSetMensal">Valor recorrente</label>
-                    </div>
-                    <div class="form-group">
-                        <button id="addButton" onclick="addValor(document.getElementById('eventToADD').innerText)">Add</button>
-                        <button id="cancelButton">Cancelar</button>
-                    </div>
-                </div>
-
-                <div id="deleteEventModal">
-                    <h2 id="tipoDado"></h2>
-                    <button id="plusBotao">
-                        <i class="fa-solid fa-circle-plus"></i>
-                    </button>
-
-                    <button id="editBotao">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-
-                    <button id="plusBotaoDeb">
-                        <i class="fa-solid fa-circle-plus"></i>
-                    </button>
-
-                    <button id="editBotaoDeb">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <p id="eventText"></p>
-                    <p id="valueText0" style="font-weight: bold;"></p>
-                    <p id="valueText"></p>
-                    <p id="eventTextDeb"></p>
-                    <p id="valueTextDeb0" style="font-weight: bold;"></p>
-                    <p id="valueTextDeb"></p>
-                    <!-- 
-                    <button id="deleteButton">Delete</button> -->
-                    <button id="closeButton">Fechar</button>
-                </div>
-
-                <div id="modalBackDrop"></div>
-            </div>
-            <div class="tab-pane fade" id="diario-tab-content">
-                <div class="row justify-content-center" style="text-align: center">
-                    <h1 class="text-center">DIÁRIO</h1>
-                </div>
-            </div>
+        <div class="operadores mb-4">
+            <button class="btn btn-secondary operador">+</button>
+            <button class="btn btn-secondary operador">-</button>
+            <button class="btn btn-secondary operador">×</button>
+            <button class="btn btn-secondary operador">÷</button>
         </div>
 
+        <h5>Operação Montada:</h5>
+        <div id="operacao" class="display-operacao mb-3"></div>
+
+        <button class="btn btn-success" onclick="calcular()">Calcular</button>
+        <div class="mt-3">
+            <strong>Resultado:</strong>
+            <span id="resultado">?</span>
+        </div>
+        <div id="resposta-correta" class="text-danger mt-3 fw-bold"></div>
     </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="/src/index.js"></script>
 </body>
-<script src="/src/index.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-    crossorigin="anonymous"></script>
 
 </html>
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Bootstrap Example</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-</head>
-<body>
-
-<div class="container">
-  <h2>Dynamic Tabs</h2>
-  <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-    <li><a data-toggle="tab" href="#menu1">Menu 1</a></li>
-    <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
-    <li><a data-toggle="tab" href="#menu3">Menu 3</a></li>
-  </ul>
-
-  <div class="tab-content">
-    <div id="home" class="tab-pane fade in active">
-      <h3>HOME</h3>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-    </div>
-    <div id="menu1" class="tab-pane fade">
-      <h3>Menu 1</h3>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    </div>
-    <div id="menu2" class="tab-pane fade">
-      <h3>Menu 2</h3>
-      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
-    </div>
-    <div id="menu3" class="tab-pane fade">
-      <h3>Menu 3</h3>
-      <p>Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-    </div>
-  </div>
-</div>
-
-</body>
-</html> -->

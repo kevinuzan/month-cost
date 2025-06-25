@@ -4,6 +4,8 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser';
+import { Server } from 'socket.io'; // ADICIONE ISSO no topo
+
 
 var app = express();
 var server = createServer(app);
@@ -27,54 +29,38 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname + '/index.html'));
 });
 
-app.get('/changeJsonData', function (req, res) {
-  var newDataAppend = req.query.name.split(';')[0]
-  var id = req.query.name.split(';')[1]
-  var resultado = changeJson(newDataAppend, id)
-  res.json(resultado)
-});
+const io = new Server(server);
 
-function changeJson(newDataAppend, id) {
-  try {
-    // Leitura do arquivo JSON
-    const data = fs.readFileSync(path.join(__dirname + '/public/json/itemData.json'), 'utf8');
-    // Conversão do JSON em objeto JavaScript
-    const jsonData = JSON.parse(data);
+let liderId = null;
+let estadoJogo = {
+  numeros: [],
+  alvo: 0,
+  expressaoCorreta: ""
+};
 
-    // Adição de um novo item à lista 'itemDespesas'
-    var newItem = newDataAppend;
-    if (id === "despesasBtn") {
-      if (jsonData["itemDespesa"].indexOf(newItem.toLowerCase()) == -1) {
-        jsonData["itemDespesa"][0][newItem] = 0;
-      }
-    } else {
-      if (jsonData["itemRenda"].indexOf(newItem.toLowerCase()) == -1) {
-        jsonData["itemRenda"][0][newItem] = 0;
-      }
-    }
+io.on("connection", (socket) => {
+  console.log("Usuário conectado:", socket.id);
 
-    // Conversão do objeto JavaScript atualizado de volta para JSON
-    const updatedJson = JSON.stringify(jsonData, null, 2);
-    // Escrita do JSON atualizado de volta ao arquivo
-    fs.writeFileSync(path.join(__dirname + '/public/json/itemData.json'), updatedJson, 'utf8');
-    return [updatedJson, true];
-  } catch (err) {
-    console.error('Erro ao ler ou escrever o arquivo JSON:', err);
-    return [err, false];
+  // Define o primeiro usuário como líder
+  if (!liderId) {
+    liderId = socket.id;
+    io.to(socket.id).emit("definirLider");
   }
-}
 
+  // Envia estado atual
+  socket.emit("estadoAtual", estadoJogo);
 
-app.post('/salvar-json', (req, res) => {
-  const jsonData = req.body;
-  // Salvar o JSON em um arquivo
-  fs.writeFile(path.join(__dirname + '/public/json/calendarData.json'), JSON.stringify(jsonData, null, 2), 'utf8', (err) => {
-    if (err) {
-      console.error('Erro ao escrever o arquivo:', err);
-      res.status(500).json({ error: 'Erro ao salvar o arquivo.' });
-      return;
+  // Recebe nova rodada (só líder pode enviar)
+  socket.on("novaRodada", (dados) => {
+    if (socket.id === liderId) {
+      estadoJogo = dados;
+      socket.broadcast.emit("atualizarRodada", dados);
     }
-    console.log('Arquivo atualizado com sucesso!');
-    res.json({ success: true });
+  });
+
+  socket.on("disconnect", () => {
+    if (socket.id === liderId) {
+      liderId = null;
+    }
   });
 });
