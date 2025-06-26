@@ -3,9 +3,7 @@ let numerosDisponiveis = [];
 let numeroAlvo = 0;
 let expressaoCorreta = "";
 let todasSolucoes = [];
-
-const socket = io();
-let souLider = false;
+let acertosUsuario = new Set();
 
 function sortearNumeros() {
     const qtd = parseInt(document.getElementById("quantidade").value);
@@ -19,23 +17,19 @@ function sortearNumeros() {
     numerosDisponiveis = [...sorteados];
     operacaoAtual = "";
     atualizarOperacao();
+    acertosUsuario.clear();
+
     document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
+    document.getElementById("acertos").innerHTML = "";
     document.getElementById("todas-solucoes").innerHTML = "";
+    document.getElementById("info-solucoes").textContent = "Soluções possíveis: ...";
 
-    // Definir limites com base na dificuldade
     const dificuldade = document.getElementById("dificuldade").value;
-    let minAlvo = 50, maxAlvo = 100;
-    if (dificuldade === "medio") {
-        minAlvo = 100;
-        maxAlvo = 200;
-    } else if (dificuldade === "dificil") {
-        minAlvo = 200;
-        maxAlvo = 400;
-    } else if (dificuldade === "facil") {
-        minAlvo = 10;
-        maxAlvo = 50;
-    }
+    let minAlvo = 10, maxAlvo = 50;
+    if (dificuldade === "normal") [minAlvo, maxAlvo] = [50, 100];
+    else if (dificuldade === "medio") [minAlvo, maxAlvo] = [100, 200];
+    else if (dificuldade === "dificil") [minAlvo, maxAlvo] = [200, 400];
 
     gerarNumeroAlvo(numerosDisponiveis, minAlvo, maxAlvo);
     renderizarNumeros();
@@ -94,20 +88,19 @@ function calcular() {
         document.getElementById("resultado").textContent = total;
 
         if (total === numeroAlvo) {
-            document.getElementById("resposta-correta").textContent = "✅ Parabéns! Você acertou!";
+            if (!acertosUsuario.has(operacaoAtual)) {
+                acertosUsuario.add(operacaoAtual);
+                const li = document.createElement("li");
+                li.textContent = operacaoAtual + " = " + numeroAlvo;
+                document.getElementById("acertos").appendChild(li);
+                document.getElementById("resposta-correta").textContent = "✅ Acertou!";
+            } else {
+                document.getElementById("resposta-correta").textContent = "⚠️ Você já usou essa solução.";
+            }
         } else {
             document.getElementById("resposta-correta").textContent =
-                "❌ Errou. Uma resposta possível seria: " + expressaoCorreta + " = " + numeroAlvo;
+                "❌ Errou. Uma possível resposta seria: " + expressaoCorreta + " = " + numeroAlvo;
         }
-
-        // Mostrar todas as soluções possíveis
-        const lista = document.getElementById("todas-solucoes");
-        lista.innerHTML = "";
-        todasSolucoes.forEach(expr => {
-            const li = document.createElement("li");
-            li.textContent = expr + " = " + numeroAlvo;
-            lista.appendChild(li);
-        });
 
     } catch (e) {
         document.getElementById("resultado").textContent = "Erro";
@@ -126,15 +119,13 @@ function gerarOperadores(ops, tamanho) {
     return resultado;
 }
 
-
-
 function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
     const dificuldade = document.getElementById("dificuldade").value;
     let intervalo = { min: 10, max: 50 };
+    if (dificuldade === "normal") intervalo = { min: 50, max: 100 };
+    else if (dificuldade === "medio") intervalo = { min: 100, max: 200 };
+    else if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
 
-if (dificuldade === "normal") intervalo = { min: 50, max: 100 };
-else if (dificuldade === "medio") intervalo = { min: 100, max: 200 };
-else if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
     const operadores = ["+", "-", "×", "÷"];
     const expPossiveis = [];
 
@@ -159,7 +150,6 @@ else if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
             numsPermutados.push(...permutacoes(c));
         });
     }
-
 
     for (const numSeq of numsPermutados) {
         const n = numSeq.length;
@@ -204,9 +194,7 @@ else if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
         }
     }
 
-    // Remove expressões duplicadas que usam os mesmos números e operadores
     const unicosPorAssinatura = new Map();
-
     expPossiveis.forEach(({ expr, result }) => {
         const tokens = expr.match(/\d+|[+\-×÷]/g);
         const nums = [];
@@ -232,7 +220,6 @@ else if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
         document.getElementById("alvo").textContent = numeroAlvo;
 
         const unicas = new Map();
-
         expPossiveis
             .filter(e => e.result === numeroAlvo)
             .forEach(e => {
@@ -243,11 +230,13 @@ else if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
             });
 
         todasSolucoes = Array.from(unicas.values());
+        document.getElementById("info-solucoes").textContent = `Soluções possíveis: ${todasSolucoes.length}`;
     } else {
         numeroAlvo = 0;
         expressaoCorreta = "";
         todasSolucoes = [];
         document.getElementById("alvo").textContent = "?";
+        document.getElementById("info-solucoes").textContent = "Soluções possíveis: 0";
     }
 }
 
@@ -259,18 +248,12 @@ function gerarAssinatura(expr) {
     const operadores = [];
 
     for (let i = 0; i < tokens.length; i++) {
-        if (i % 2 === 0) {
-            numeros.push(tokens[i]);
-        } else {
-            operadores.push(tokens[i]);
-        }
+        if (i % 2 === 0) numeros.push(tokens[i]);
+        else operadores.push(tokens[i]);
     }
 
-    // Ordena os números para normalizar somas/subtrações equivalentes
-    const assinatura = [...numeros].sort((a, b) => a - b).join(",") + "|" + operadores.sort().join("");
-    return assinatura;
+    return [...numeros].sort((a, b) => a - b).join(",") + "|" + operadores.sort().join("");
 }
-
 
 function combinacoes(arr, k) {
     if (k === 0) return [[]];
@@ -282,8 +265,8 @@ function combinacoes(arr, k) {
     return comPrimeiro.concat(semPrimeiro);
 }
 
-
 document.getElementById("sortear").addEventListener("click", sortearNumeros);
+document.getElementById("calcular").addEventListener("click", calcular);
 
 document.querySelectorAll(".operador").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -295,14 +278,12 @@ document.querySelectorAll(".operador").forEach((btn) => {
 document.getElementById("limpar").addEventListener("click", () => {
     operacaoAtual = "";
     atualizarOperacao();
-
-    // Liberar todos os números usados
     document.querySelectorAll(".numero.usado").forEach(div => {
         div.classList.remove("usado");
     });
 
-    // Limpar resultado e feedback
-   document.getElementById("todas-solucoes").innerHTML = ""; document.getElementById("resultado").textContent = "?";
+    document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
 });
+
 sortearNumeros();
