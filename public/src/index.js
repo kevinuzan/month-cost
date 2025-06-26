@@ -130,10 +130,11 @@ function gerarOperadores(ops, tamanho) {
 
 function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
     const dificuldade = document.getElementById("dificuldade").value;
-    let intervalo = { min: 50, max: 100 };
+    let intervalo = { min: 10, max: 50 };
 
-    if (dificuldade === "medio") intervalo = { min: 100, max: 200 };
-    if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
+if (dificuldade === "normal") intervalo = { min: 50, max: 100 };
+else if (dificuldade === "medio") intervalo = { min: 100, max: 200 };
+else if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
     const operadores = ["+", "-", "×", "÷"];
     const expPossiveis = [];
 
