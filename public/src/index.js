@@ -302,7 +302,7 @@ document.getElementById("limpar").addEventListener("click", () => {
     });
 
     // Limpar resultado e feedback
-    document.getElementById("resultado").textContent = "?";
+   document.getElementById("todas-solucoes").innerHTML = ""; document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
 });
 sortearNumeros();
