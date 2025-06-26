@@ -4,15 +4,15 @@ let numeroAlvo = 0;
 let expressaoCorreta = "";
 let todasSolucoes = [];
 
-const socket = io();
 let souLider = false;
 
 function sortearNumeros() {
     const qtd = parseInt(document.getElementById("quantidade").value);
     const sorteados = new Set();
-
+    const maximosorteado = parseInt(document.getElementById("maximosorteado").value);
+    
     while (sorteados.size < qtd) {
-        const num = Math.floor(Math.random() * 14) + 1;
+        const num = Math.floor(Math.random() * maximosorteado) + 1;
         sorteados.add(num);
     }
 
@@ -95,9 +95,11 @@ function calcular() {
 
         if (total === numeroAlvo) {
             document.getElementById("resposta-correta").textContent = "✅ Parabéns! Você acertou!";
+            feedbackCorreto();
         } else {
             document.getElementById("resposta-correta").textContent =
                 "❌ Errou. Uma resposta possível seria: " + expressaoCorreta + " = " + numeroAlvo;
+            feedbackErro()
         }
 
         // Mostrar todas as soluções possíveis
@@ -298,6 +300,21 @@ document.getElementById("limpar").addEventListener("click", () => {
     document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
 });
+function feedbackCorreto() {
+    const resultadoEl = document.getElementById('resultado');
+    resultadoEl.classList.add('feedback-correto');
+    document.getElementById('som-acerto').play();
+    setTimeout(() => {
+        resultadoEl.classList.remove('feedback-correto');
+    }, 1000);
+}
 
+function feedbackErro() {
+    const resultadoEl = document.getElementById('resultado');
+    resultadoEl.classList.add('feedback-erro');
+    document.getElementById('som-erro').play();
+    setTimeout(() => {
+        resultadoEl.classList.remove('feedback-erro');
+    }, 1000);
+}
 sortearNumeros()
-
