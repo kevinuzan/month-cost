@@ -8,20 +8,34 @@ const socket = io();
 let souLider = false;
 
 function sortearNumeros() {
+    const qtd = parseInt(document.getElementById("quantidade").value);
     const sorteados = new Set();
-    while (sorteados.size < 5) {
+
+    while (sorteados.size < qtd) {
         const num = Math.floor(Math.random() * 14) + 1;
         sorteados.add(num);
     }
 
     numerosDisponiveis = [...sorteados];
-    gerarNumeroAlvo(numerosDisponiveis);
-    renderizarNumeros();
     operacaoAtual = "";
     atualizarOperacao();
     document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
     document.getElementById("todas-solucoes").innerHTML = "";
+
+    // Definir limites com base na dificuldade
+    const dificuldade = document.getElementById("dificuldade").value;
+    let minAlvo = 50, maxAlvo = 100;
+    if (dificuldade === "medio") {
+        minAlvo = 100;
+        maxAlvo = 200;
+    } else if (dificuldade === "dificil") {
+        minAlvo = 200;
+        maxAlvo = 400;
+    }
+
+    gerarNumeroAlvo(numerosDisponiveis, minAlvo, maxAlvo);
+    renderizarNumeros();
 }
 
 function renderizarNumeros() {
@@ -36,9 +50,14 @@ function renderizarNumeros() {
 
         div.addEventListener("click", () => {
             if (!div.classList.contains("usado")) {
-                operacaoAtual += n;
-                div.classList.add("usado");
-                atualizarOperacao();
+                const ultimoChar = operacaoAtual.slice(-1);
+                const ehOperador = ["+", "-", "×", "÷"].includes(ultimoChar) || operacaoAtual.length === 0;
+
+                if (ehOperador) {
+                    operacaoAtual += n;
+                    div.classList.add("usado");
+                    atualizarOperacao();
+                }
             }
         });
 
@@ -92,7 +111,7 @@ function calcular() {
     }
 }
 
-function gerarNumeroAlvo(numeros) {
+function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
     const operadores = ["+", "-", "×", "÷"];
     const expPossiveis = [];
 
@@ -145,13 +164,32 @@ function gerarNumeroAlvo(numeros) {
                             if (isNaN(total)) break;
                         }
 
-                        if (!isNaN(total) && Number.isInteger(total) && total >= 50 && total <= 100) {
+                        if (!isNaN(total) && Number.isInteger(total) && total >= minAlvo && total <= maxAlvo) {
                             expPossiveis.push({ expr, result: total });
                         }
                     }
     }
 
-    const filtradas = expPossiveis.filter(e => e.result);
+    // Remove expressões duplicadas que usam os mesmos números e operadores
+    const unicosPorAssinatura = new Map();
+
+    expPossiveis.forEach(({ expr, result }) => {
+        const tokens = expr.match(/\d+|[+\-×÷]/g);
+        const nums = [];
+        const ops = [];
+
+        for (let i = 0; i < tokens.length; i++) {
+            if (i % 2 === 0) nums.push(tokens[i]);
+            else ops.push(tokens[i]);
+        }
+
+        const assinatura = nums.slice().sort((a, b) => a - b).join(",") + "|" + ops.join(",");
+        if (!unicosPorAssinatura.has(assinatura)) {
+            unicosPorAssinatura.set(assinatura, { expr, result });
+        }
+    });
+
+    const filtradas = [...unicosPorAssinatura.values()];
 
     if (filtradas.length > 0) {
         const escolhida = filtradas[Math.floor(Math.random() * filtradas.length)];
@@ -179,4 +217,17 @@ document.querySelectorAll(".operador").forEach((btn) => {
     });
 });
 
+document.getElementById("limpar").addEventListener("click", () => {
+    operacaoAtual = "";
+    atualizarOperacao();
+
+    // Liberar todos os números usados
+    document.querySelectorAll(".numero.usado").forEach(div => {
+        div.classList.remove("usado");
+    });
+
+    // Limpar resultado e feedback
+    document.getElementById("resultado").textContent = "?";
+    document.getElementById("resposta-correta").textContent = "";
+});
 sortearNumeros();
