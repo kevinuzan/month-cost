@@ -32,7 +32,11 @@ function sortearNumeros() {
     } else if (dificuldade === "dificil") {
         minAlvo = 200;
         maxAlvo = 400;
-    }
+    } else if (dificuldade=== "facil")
+{
+        minAlvo = 10;
+        maxAlvo = 50;
+}
 
     gerarNumeroAlvo(numerosDisponiveis, minAlvo, maxAlvo);
     renderizarNumeros();
