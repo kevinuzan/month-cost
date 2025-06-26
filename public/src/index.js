@@ -111,7 +111,26 @@ function calcular() {
     }
 }
 
+function gerarOperadores(ops, tamanho) {
+    if (tamanho === 0) return [[]];
+    const resultado = [];
+    const menores = gerarOperadores(ops, tamanho - 1);
+    for (const m of menores) {
+        for (const o of ops) {
+            resultado.push([...m, o]);
+        }
+    }
+    return resultado;
+}
+
+
+
 function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
+    const dificuldade = document.getElementById("dificuldade").value;
+    let intervalo = { min: 50, max: 100 };
+
+    if (dificuldade === "medio") intervalo = { min: 100, max: 200 };
+    if (dificuldade === "dificil") intervalo = { min: 200, max: 400 };
     const operadores = ["+", "-", "×", "÷"];
     const expPossiveis = [];
 
@@ -129,45 +148,56 @@ function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
         return resultado;
     }
 
-    const numsPermutados = permutacoes(numeros);
+    let numsPermutados = [];
+    for (let k = 2; k <= Math.min(5, numeros.length); k++) {
+        const combs = combinacoes(numeros, k);
+        combs.forEach(c => {
+            numsPermutados.push(...permutacoes(c));
+        });
+    }
+
 
     for (const numSeq of numsPermutados) {
-        for (let o1 of operadores)
-            for (let o2 of operadores)
-                for (let o3 of operadores)
-                    for (let o4 of operadores) {
-                        const expr = [
-                            numSeq[0], o1,
-                            numSeq[1], o2,
-                            numSeq[2], o3,
-                            numSeq[3], o4,
-                            numSeq[4]
-                        ].join('');
+        const n = numSeq.length;
+        const operadorComb = gerarOperadores(operadores, n - 1);
 
-                        const tokens = expr.match(/\d+|[+\-×÷]/g);
-                        let total = parseInt(tokens[0]);
-                        for (let i = 1; i < tokens.length; i += 2) {
-                            const op = tokens[i];
-                            const val = parseInt(tokens[i + 1]);
-                            switch (op) {
-                                case "+": total += val; break;
-                                case "-": total -= val; break;
-                                case "×": total *= val; break;
-                                case "÷":
-                                    if (val === 0 || total % val !== 0) {
-                                        total = NaN;
-                                    } else {
-                                        total /= val;
-                                    }
-                                    break;
-                            }
-                            if (isNaN(total)) break;
-                        }
+        for (const ops of operadorComb) {
+            const expr = [];
+            for (let i = 0; i < n - 1; i++) {
+                expr.push(numSeq[i]);
+                expr.push(ops[i]);
+            }
+            expr.push(numSeq[n - 1]);
 
-                        if (!isNaN(total) && Number.isInteger(total) && total >= minAlvo && total <= maxAlvo) {
-                            expPossiveis.push({ expr, result: total });
+            const exprStr = expr.join('');
+            const tokens = exprStr.match(/\d+|[+\-×÷]/g);
+            let total = parseInt(tokens[0]);
+
+            for (let i = 1; i < tokens.length; i += 2) {
+                const op = tokens[i];
+                const val = parseInt(tokens[i + 1]);
+
+                switch (op) {
+                    case "+": total += val; break;
+                    case "-": total -= val; break;
+                    case "×":
+                        if (val === 1) { total = NaN; break; }
+                        total *= val; break;
+                    case "÷":
+                        if (val === 1 || val === 0 || total % val !== 0) {
+                            total = NaN;
+                        } else {
+                            total /= val;
                         }
-                    }
+                        break;
+                }
+                if (isNaN(total)) break;
+            }
+
+            if (!isNaN(total) && Number.isInteger(total) && total >= intervalo.min && total <= intervalo.max) {
+                expPossiveis.push({ expr: exprStr, result: total });
+            }
+        }
     }
 
     // Remove expressões duplicadas que usam os mesmos números e operadores
@@ -197,9 +227,18 @@ function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
         expressaoCorreta = escolhida.expr;
         document.getElementById("alvo").textContent = numeroAlvo;
 
-        todasSolucoes = filtradas
+        const unicas = new Map();
+
+        expPossiveis
             .filter(e => e.result === numeroAlvo)
-            .map(e => e.expr);
+            .forEach(e => {
+                const assinatura = gerarAssinatura(e.expr);
+                if (!unicas.has(assinatura)) {
+                    unicas.set(assinatura, e.expr);
+                }
+            });
+
+        todasSolucoes = Array.from(unicas.values());
     } else {
         numeroAlvo = 0;
         expressaoCorreta = "";
@@ -207,6 +246,38 @@ function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
         document.getElementById("alvo").textContent = "?";
     }
 }
+
+function gerarAssinatura(expr) {
+    const tokens = expr.match(/\d+|[+\-×÷]/g);
+    if (!tokens) return expr;
+
+    const numeros = [];
+    const operadores = [];
+
+    for (let i = 0; i < tokens.length; i++) {
+        if (i % 2 === 0) {
+            numeros.push(tokens[i]);
+        } else {
+            operadores.push(tokens[i]);
+        }
+    }
+
+    // Ordena os números para normalizar somas/subtrações equivalentes
+    const assinatura = [...numeros].sort((a, b) => a - b).join(",") + "|" + operadores.sort().join("");
+    return assinatura;
+}
+
+
+function combinacoes(arr, k) {
+    if (k === 0) return [[]];
+    if (arr.length < k) return [];
+
+    const [primeiro, ...resto] = arr;
+    const comPrimeiro = combinacoes(resto, k - 1).map(c => [primeiro, ...c]);
+    const semPrimeiro = combinacoes(resto, k);
+    return comPrimeiro.concat(semPrimeiro);
+}
+
 
 document.getElementById("sortear").addEventListener("click", sortearNumeros);
 
