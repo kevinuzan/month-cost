@@ -1,38 +1,136 @@
-.numero {
-  width: 60px;
-  height: 60px;
-  background-color: #e0e0e0;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
 
-.numero:hover {
-  background-color: #ccc;
-}
+body {
+            font-family: 'Rubik', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa, #e0f7fa);
+            color: #333;
+            transition: background 0.5s ease;
+        }
 
-.numero.selecionado {
-  background-color: #0d6efd;
-  color: white;
-  font-weight: bold;
-}
+        h1 {
+            font-weight: 700;
+            color: #0d6efd;
+        }
 
-.operadores .btn {
-  margin: 0 5px;
-  font-size: 20px;
-  width: 50px;
-}
+        .numero {
+            width: 70px;
+            height: 70px;
+            background-color: #e0e0e0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-.display-operacao {
-  font-size: 24px;
-  min-height: 40px;
-  border: 1px solid #ccc;
-  padding: 8px;
-  margin-top: 8px;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-}
+        .numero:hover {
+            background-color: #cfd8dc;
+            transform: scale(1.05);
+        }
+
+        .numero.selecionado {
+            background-color: #0d6efd;
+            color: white;
+            font-weight: bold;
+            transform: scale(1.1);
+        }
+
+        .operadores .btn {
+            margin: 0 8px;
+            font-size: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .operadores .btn:hover {
+            transform: scale(1.1);
+        }
+
+        .display-operacao {
+            font-size: 22px;
+            min-height: 48px;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        #resultado {
+            font-size: 22px;
+            color: #198754;
+        }
+
+        #resposta-correta {
+            font-size: 20px;
+            color: #dc3545;
+        }
+
+        #todas-solucoes {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 576px) {
+            .operadores .btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .numero {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+        }
+
+        .feedback-correto {
+            animation: pulse 0.4s ease-in-out 2;
+            color: #198754 !important;
+        }
+
+        .feedback-erro {
+            animation: shake 0.4s ease-in-out 2;
+            color: #dc3545 !important;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
