@@ -3,14 +3,24 @@ let numerosDisponiveis = [];
 let numeroAlvo = 0;
 let expressaoCorreta = "";
 let todasSolucoes = [];
+let expCorretasRespondidas = new Set();
+let pontuacao = 0;
 
-let souLider = false;
+function atualizarPontuacao(valor) {
+    pontuacao += valor;
+    document.getElementById("pontuacao").textContent = pontuacao;
+}
+
+function resetarPontuacao() {
+    pontuacao = 0;
+    document.getElementById("pontuacao").textContent = pontuacao;
+}
 
 function sortearNumeros() {
     const qtd = parseInt(document.getElementById("quantidade").value);
     const sorteados = new Set();
     const maximosorteado = parseInt(document.getElementById("maximosorteado").value);
-    
+
     while (sorteados.size < qtd) {
         const num = Math.floor(Math.random() * maximosorteado) + 1;
         sorteados.add(num);
@@ -21,9 +31,11 @@ function sortearNumeros() {
     atualizarOperacao();
     document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
-    document.getElementById("todas-solucoes").innerHTML = "";
+    document.getElementById("acertos-unicos").innerHTML = "";
+    document.getElementById("todas-solucoes")?.remove();
+    document.getElementById("botao-solucoes")?.remove();
+    expCorretasRespondidas.clear();
 
-    // Definir limites com base na dificuldade
     const dificuldade = document.getElementById("dificuldade").value;
     let minAlvo = 50, maxAlvo = 100;
     if (dificuldade === "medio") {
@@ -39,7 +51,47 @@ function sortearNumeros() {
 
     gerarNumeroAlvo(numerosDisponiveis, minAlvo, maxAlvo);
     renderizarNumeros();
+    adicionarBotaoMostrarSolucoes();
+    adicionarBotaoResetarPontuacao();
 }
+
+function adicionarBotaoMostrarSolucoes() {
+    const container = document.createElement("div");
+    container.className = "mt-3";
+    container.id = "botao-solucoes";
+
+    const btn = document.createElement("button");
+    btn.textContent = "Mostrar todas as soluções";
+    btn.className = "btn btn-info me-2";
+    btn.onclick = () => {
+        const lista = document.createElement("ul");
+        lista.id = "todas-solucoes";
+        lista.className = "text-start mx-auto mt-3";
+        todasSolucoes.forEach(expr => {
+            const li = document.createElement("li");
+            li.textContent = expr + " = " + numeroAlvo;
+            lista.appendChild(li);
+        });
+        btn.remove();
+        container.appendChild(lista);
+    };
+
+    container.appendChild(btn);
+    document.querySelector(".container").appendChild(container);
+}
+
+function adicionarBotaoResetarPontuacao() {
+    if (document.getElementById("botao-resetar")) return;
+
+    const btnReset = document.createElement("button");
+    btnReset.textContent = "Resetar Pontuação";
+    btnReset.className = "btn btn-danger mt-2";
+    btnReset.id = "botao-resetar";
+    btnReset.onclick = resetarPontuacao;
+
+    document.querySelector(".container").appendChild(btnReset);
+}
+
 
 function renderizarNumeros() {
     const container = document.getElementById("numeros");
@@ -94,27 +146,30 @@ function calcular() {
         document.getElementById("resultado").textContent = total;
 
         if (total === numeroAlvo) {
-            document.getElementById("resposta-correta").textContent = "✅ Parabéns! Você acertou!";
+            if (expCorretasRespondidas.has(operacaoAtual)) {
+                document.getElementById("resposta-correta").textContent = "⚠️ Essa operação já foi usada.";
+                feedbackErro();
+                return;
+            }
+
+            expCorretasRespondidas.add(operacaoAtual);
+            document.getElementById("resposta-correta").textContent = "✅ Correto!";
+            const li = document.createElement("li");
+            li.textContent = operacaoAtual + " = " + numeroAlvo;
+            document.getElementById("acertos-unicos").appendChild(li);
+            atualizarPontuacao(1);
             feedbackCorreto();
         } else {
-            document.getElementById("resposta-correta").textContent =
-                "❌ Errou. Uma resposta possível seria: " + expressaoCorreta + " = " + numeroAlvo;
-            feedbackErro()
+            document.getElementById("resposta-correta").textContent = "❌ Erro.";
+            atualizarPontuacao(-1);
+            feedbackErro();
         }
-
-        // Mostrar todas as soluções possíveis
-        const lista = document.getElementById("todas-solucoes");
-        lista.innerHTML = "";
-        todasSolucoes.forEach(expr => {
-            const li = document.createElement("li");
-            li.textContent = expr + " = " + numeroAlvo;
-            lista.appendChild(li);
-        });
-
     } catch (e) {
         document.getElementById("resultado").textContent = "Erro";
     }
 }
+
+
 
 function gerarOperadores(ops, tamanho) {
     if (tamanho === 0) return [[]];
@@ -279,6 +334,25 @@ function combinacoes(arr, k) {
     return comPrimeiro.concat(semPrimeiro);
 }
 
+
+function feedbackCorreto() {
+    const resultadoEl = document.getElementById("resultado");
+    resultadoEl.classList.add("feedback-correto");
+    document.getElementById("som-acerto").play();
+    setTimeout(() => {
+        resultadoEl.classList.remove("feedback-correto");
+    }, 1000);
+}
+
+function feedbackErro() {
+    const resultadoEl = document.getElementById("resultado");
+    resultadoEl.classList.add("feedback-erro");
+    document.getElementById("som-erro").play();
+    setTimeout(() => {
+        resultadoEl.classList.remove("feedback-erro");
+    }, 1000);
+}
+
 document.getElementById("sortear").addEventListener("click", sortearNumeros);
 
 document.querySelectorAll(".operador").forEach((btn) => {
@@ -296,25 +370,7 @@ document.getElementById("limpar").addEventListener("click", () => {
         div.classList.remove("usado");
     });
 
-    document.getElementById("todas-solucoes").innerHTML = "";
     document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
 });
-function feedbackCorreto() {
-    const resultadoEl = document.getElementById('resultado');
-    resultadoEl.classList.add('feedback-correto');
-    document.getElementById('som-acerto').play();
-    setTimeout(() => {
-        resultadoEl.classList.remove('feedback-correto');
-    }, 1000);
-}
-
-function feedbackErro() {
-    const resultadoEl = document.getElementById('resultado');
-    resultadoEl.classList.add('feedback-erro');
-    document.getElementById('som-erro').play();
-    setTimeout(() => {
-        resultadoEl.classList.remove('feedback-erro');
-    }, 1000);
-}
 sortearNumeros()
