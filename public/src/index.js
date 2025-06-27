@@ -379,7 +379,7 @@ function gerarNumeroAlvo(numeros, minAlvo, maxAlvo) {
     }
 }
 
-function gerarAssinatura(expr) {
+function aagerarAssinatura(expr) {
     const tokens = expr.match(/\d+|[+\-×÷]/g);
     if (!tokens) return expr;
 
@@ -396,6 +396,28 @@ function gerarAssinatura(expr) {
 
     const assinatura = [...numeros].sort((a, b) => a - b).join(",") + "|" + operadores.sort().join("");
     return assinatura;
+}
+
+function gerarAssinatura(expr) {
+    const tokens = expr.match(/\d+|[+\-×÷]/g);
+    if (!tokens) return expr;
+
+    const numeros = [];
+    const operadores = [];
+
+    // Pegando os números na ordem de aparição
+    for (let i = 0; i < tokens.length; i++) {
+        if (i % 2 === 0) {
+            numeros.push(parseInt(tokens[i]));
+        } else {
+            operadores.push(tokens[i]);
+        }
+    }
+
+    // Ordenar os números, mas manter operadores na ordem
+    const numsOrdenados = [...numeros].sort((a, b) => a - b);
+
+    return numsOrdenados.join(",") + "|" + operadores.join("");
 }
 
 function combinacoes(arr, k) {
