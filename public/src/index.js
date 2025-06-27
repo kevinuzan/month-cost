@@ -9,69 +9,7 @@ let modoSelecionado = "livre";
 let tempoLimiteSegundos = 0;
 let tempoRestante = 0;
 let intervaloTempo = null;
-// const socket = io();
-// let salaId = null;
 
-// // Criar sala
-// function criarSala1x1() {
-//     socket.emit("criar-sala", (id) => {
-//         salaId = id;
-//         const link = `${window.location.href}?sala=${id}`;
-//         alert("Link da sala: " + link);
-//     });
-// }
-
-// // Entrar em sala
-// function verificarSalaNaURL() {
-//     const params = new URLSearchParams(window.location.search);
-//     const id = params.get("sala");
-//     if (id) {
-//         socket.emit("entrar-sala", id, (res) => {
-//             if (res.sucesso) {
-//                 salaId = id;
-//                 console.log("Entrou na sala:", salaId);
-//             } else {
-//                 alert(res.msg || "Erro ao entrar na sala.");
-//             }
-//         });
-//     }
-// }
-// verificarSalaNaURL();
-
-// // Quando sala estiver pronta para começar
-// socket.on("sala-pronta", () => {
-//     // Um dos dois jogadores sorteia e envia os dados
-//     if (/* jogador é host */ true) {
-//         const dadosJogo = {
-//             numeros: numerosDisponiveis,
-//             alvo: numeroAlvo,
-//             dificuldade: document.getElementById("dificuldade").value,
-//         };
-//         socket.emit("enviar-dados-jogo", { salaId, dados: dadosJogo });
-//     }
-// });
-
-// // Quando receber dados do host
-// socket.on("receber-dados-jogo", (dados) => {
-//     numerosDisponiveis = dados.numeros;
-//     numeroAlvo = dados.alvo;
-//     // Chama funções para atualizar a interface
-//     atualizarOperacao();
-//     renderizarNumeros();
-//     document.getElementById("alvo").textContent = numeroAlvo;
-// });
-
-// // Ao acertar
-// socket.emit("atualizar-pontuacao", {
-//     salaId,
-//     jogador: socket.id,
-//     pontos: pontuacao
-// });
-
-// // Para atualizar o outro jogador
-// socket.on("pontuacao-atualizada", ({ jogador, pontos }) => {
-//     // Exibir a pontuação do outro jogador
-// });
 
 
 
