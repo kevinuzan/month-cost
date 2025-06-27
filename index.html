@@ -18,7 +18,7 @@
 
 <body>
     <div class="container text-center mt-5">
-        <h1 class="mb-4">MateMatchK</h1>
+        <h1 class="mb-4">MateMatchKA</h1>
         <p class="mb-4">Use os números e operadores para encontrar o resultado exato. Exercite sua mente com desafios
             matemáticos divertidos!</p>
 
@@ -44,16 +44,40 @@
             </div>
 
             <div>
+                <label for="modoJogo" class="form-label">Modo de Jogo:</label>
+                <select id="modoJogo" class="form-select">
+                    <option value="livre" selected>Modo Livre</option>
+                    <option value="tempo-1">Tempo - 1 min</option>
+                    <option value="tempo-3">Tempo - 3 min</option>
+                    <option value="tempo-5">Tempo - 5 min</option>
+                    <option value="tempo-10">Tempo - 10 min</option>
+                    <option value="speedrun-1">SpeedRun - 1 min</option>
+                    <option value="speedrun-3">SpeedRun - 3 min</option>
+                    <option value="speedrun-5">SpeedRun - 5 min</option>
+                    <option value="speedrun-10">SpeedRun - 10 min</option>
+                    <option value="1x1" disabled>1x1 (em breve)</option>
+                </select>
+            </div>
+
+
+            <div style="display: none;">
                 <label for="quantidade" class="form-label">Números:</label>
                 <select id="quantidade" class="form-select">
                     <option value="5" selected>5</option>
                 </select>
             </div>
         </div>
-
-        <button id="sortear" class="btn btn-primary mb-4">Sortear Números</button>
+        <div id="controles" class="mb-4 d-flex justify-content-center gap-2">
+            <button id="sortear" class="btn btn-primary">Sortear Números</button>
+            <!-- O botão desistir será inserido aqui via JS -->
+        </div>
+        <!-- <button id="sortear" class="btn btn-primary mb-4">Sortear Números</button> -->
 
         <h4 class="mb-3">Número a Alcançar: <span id="alvo" class="text-primary fw-bold">?</span></h4>
+        <h5 id="cronometro" class="text-danger mt-3"></h5>
+        <div id="mensagem-final" class="mt-2"></div>
+        
+        <p id="contador-solucoes" class="mt-2 text-center">Soluções restantes: ?</p>
         <div id="numeros" class="d-flex justify-content-center flex-wrap gap-3 mb-4"></div>
 
         <div class="operadores mb-4">
@@ -86,8 +110,8 @@
     <audio id="som-erro" src="https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3"></audio>
 
     <!-- Scripts -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/src/index.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/src/index.js"></script>
 
 </body>
 

@@ -38,29 +38,46 @@ let estadoJogo = {
   expressaoCorreta: ""
 };
 
+const salas = {};
+
 io.on("connection", (socket) => {
-  console.log("Usuário conectado:", socket.id);
+  console.log("Novo usuário conectado:", socket.id);
 
-  // Define o primeiro usuário como líder
-  if (!liderId) {
-    liderId = socket.id;
-    io.to(socket.id).emit("definirLider");
-  }
+  socket.on("criar-sala", (callback) => {
+    const salaId = Math.random().toString(36).substr(2, 6);
+    salas[salaId] = {
+      jogadores: [socket.id],
+      estado: null,
+    };
+    socket.join(salaId);
+    callback(salaId);
+  });
 
-  // Envia estado atual
-  socket.emit("estadoAtual", estadoJogo);
+  socket.on("entrar-sala", (salaId, callback) => {
+    const sala = salas[salaId];
+    if (sala && sala.jogadores.length === 1) {
+      sala.jogadores.push(socket.id);
+      socket.join(salaId);
+      callback({ sucesso: true });
 
-  // Recebe nova rodada (só líder pode enviar)
-  socket.on("novaRodada", (dados) => {
-    if (socket.id === liderId) {
-      estadoJogo = dados;
-      socket.broadcast.emit("atualizarRodada", dados);
+      // Notifica os dois jogadores que podem começar
+      io.to(salaId).emit("sala-pronta");
+    } else {
+      callback({ sucesso: false, msg: "Sala inválida ou cheia." });
     }
   });
 
-  socket.on("disconnect", () => {
-    if (socket.id === liderId) {
-      liderId = null;
-    }
+  socket.on("enviar-dados-jogo", ({ salaId, dados }) => {
+    // Envia os dados iniciais (números, alvo, etc.) para o outro jogador
+    socket.to(salaId).emit("receber-dados-jogo", dados);
+  });
+
+  socket.on("atualizar-pontuacao", ({ salaId, jogador, pontos }) => {
+    io.to(salaId).emit("pontuacao-atualizada", { jogador, pontos });
+  });
+
+  socket.on("desconectar-sala", (salaId) => {
+    socket.leave(salaId);
+    if (salas[salaId]) delete salas[salaId];
   });
 });

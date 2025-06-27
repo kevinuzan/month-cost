@@ -5,6 +5,75 @@ let expressaoCorreta = "";
 let todasSolucoes = [];
 let expCorretasRespondidas = new Set();
 let pontuacao = 0;
+let modoSelecionado = "livre";
+let tempoLimiteSegundos = 0;
+let tempoRestante = 0;
+let intervaloTempo = null;
+// const socket = io();
+// let salaId = null;
+
+// // Criar sala
+// function criarSala1x1() {
+//     socket.emit("criar-sala", (id) => {
+//         salaId = id;
+//         const link = `${window.location.href}?sala=${id}`;
+//         alert("Link da sala: " + link);
+//     });
+// }
+
+// // Entrar em sala
+// function verificarSalaNaURL() {
+//     const params = new URLSearchParams(window.location.search);
+//     const id = params.get("sala");
+//     if (id) {
+//         socket.emit("entrar-sala", id, (res) => {
+//             if (res.sucesso) {
+//                 salaId = id;
+//                 console.log("Entrou na sala:", salaId);
+//             } else {
+//                 alert(res.msg || "Erro ao entrar na sala.");
+//             }
+//         });
+//     }
+// }
+// verificarSalaNaURL();
+
+// // Quando sala estiver pronta para começar
+// socket.on("sala-pronta", () => {
+//     // Um dos dois jogadores sorteia e envia os dados
+//     if (/* jogador é host */ true) {
+//         const dadosJogo = {
+//             numeros: numerosDisponiveis,
+//             alvo: numeroAlvo,
+//             dificuldade: document.getElementById("dificuldade").value,
+//         };
+//         socket.emit("enviar-dados-jogo", { salaId, dados: dadosJogo });
+//     }
+// });
+
+// // Quando receber dados do host
+// socket.on("receber-dados-jogo", (dados) => {
+//     numerosDisponiveis = dados.numeros;
+//     numeroAlvo = dados.alvo;
+//     // Chama funções para atualizar a interface
+//     atualizarOperacao();
+//     renderizarNumeros();
+//     document.getElementById("alvo").textContent = numeroAlvo;
+// });
+
+// // Ao acertar
+// socket.emit("atualizar-pontuacao", {
+//     salaId,
+//     jogador: socket.id,
+//     pontos: pontuacao
+// });
+
+// // Para atualizar o outro jogador
+// socket.on("pontuacao-atualizada", ({ jogador, pontos }) => {
+//     // Exibir a pontuação do outro jogador
+// });
+
+
 
 function atualizarPontuacao(valor) {
     pontuacao += valor;
@@ -16,7 +85,61 @@ function resetarPontuacao() {
     document.getElementById("pontuacao").textContent = pontuacao;
 }
 
+function atualizarCronometro() {
+    const minutos = Math.floor(tempoRestante / 60);
+    const segundos = tempoRestante % 60;
+    document.getElementById("cronometro").textContent =
+        `⏳ Tempo restante: ${minutos}:${segundos.toString().padStart(2, '0')}`;
+}
+
 function sortearNumeros() {
+    // Reativa operadores e botão calcular
+    document.querySelectorAll(".operador").forEach(btn => btn.disabled = false);
+    document.querySelector("button.btn-success")?.removeAttribute("disabled");
+    limparMensagemFinal();
+
+    // Remove mensagens antigas
+    document.querySelectorAll(".alert").forEach(el => el.remove());
+
+
+
+    const modoRaw = document.getElementById("modoJogo").value;
+    modoSelecionado = modoRaw.split("-")[0]; // "livre", "tempo", "speedrun"
+    tempoLimiteSegundos = parseInt(modoRaw.split("-")[1]) * 60 || 0;
+
+
+    clearInterval(intervaloTempo);
+    document.getElementById("cronometro").textContent = "";
+
+    if (modoSelecionado === "tempo" || modoSelecionado === "speedrun") {
+        tempoRestante = tempoLimiteSegundos;
+        atualizarCronometro();
+
+        intervaloTempo = setInterval(() => {
+            tempoRestante--;
+            atualizarCronometro();
+
+            if (tempoRestante <= 0) {
+                clearInterval(intervaloTempo);
+                encerrarJogo();
+            }
+        }, 1000);
+        resetarPontuacao()
+    }
+
+    sorteiaNovoNumero();
+    adicionarBotaoResetarPontuacao();
+
+    // Se for modo de tempo ou speedrun, desativa "Sortear" e ativa "Desistir"
+    if (modoSelecionado === "tempo" || modoSelecionado === "speedrun") {
+        document.getElementById("sortear").disabled = true;
+        adicionarBotaoDesistir();
+    } else {
+        removerBotaoDesistir();
+    }
+}
+
+function sorteiaNovoNumero() {
     const qtd = parseInt(document.getElementById("quantidade").value);
     const sorteados = new Set();
     const maximosorteado = parseInt(document.getElementById("maximosorteado").value);
@@ -52,7 +175,7 @@ function sortearNumeros() {
     gerarNumeroAlvo(numerosDisponiveis, minAlvo, maxAlvo);
     renderizarNumeros();
     adicionarBotaoMostrarSolucoes();
-    adicionarBotaoResetarPontuacao();
+    atualizarContadorSolucoes();
 }
 
 function adicionarBotaoMostrarSolucoes() {
@@ -146,19 +269,32 @@ function calcular() {
         document.getElementById("resultado").textContent = total;
 
         if (total === numeroAlvo) {
-            if (expCorretasRespondidas.has(operacaoAtual)) {
+            const assinatura = gerarAssinatura(operacaoAtual);
+            if (expCorretasRespondidas.has(assinatura)) {
                 document.getElementById("resposta-correta").textContent = "⚠️ Essa operação já foi usada.";
                 feedbackErro();
                 return;
             }
 
-            expCorretasRespondidas.add(operacaoAtual);
+            expCorretasRespondidas.add(assinatura);
             document.getElementById("resposta-correta").textContent = "✅ Correto!";
             const li = document.createElement("li");
             li.textContent = operacaoAtual + " = " + numeroAlvo;
             document.getElementById("acertos-unicos").appendChild(li);
             atualizarPontuacao(1);
             feedbackCorreto();
+            document.getElementById("operacao").textContent = "";
+            // ...
+            atualizarContadorSolucoes();
+
+
+            const modoRaw = document.getElementById("modoJogo").value;
+            modoSelecionado = modoRaw.split("-")[0]; // "livre", "tempo", "speedrun"
+
+            // Se for modo de speedrun, e acertar, passa para a próxima
+            if (modoSelecionado === "speedrun") {
+                sorteiaNovoNumero();
+            }
         } else {
             document.getElementById("resposta-correta").textContent = "❌ Erro.";
             atualizarPontuacao(-1);
@@ -352,6 +488,71 @@ function feedbackErro() {
         resultadoEl.classList.remove("feedback-erro");
     }, 1000);
 }
+
+function atualizarContadorSolucoes() {
+    const total = todasSolucoes.length;
+    const restantes = total - expCorretasRespondidas.size;
+    document.getElementById("contador-solucoes").textContent =
+        `Soluções restantes: ${restantes} de ${total}`;
+}
+
+function encerrarJogo() {
+    document.getElementById("cronometro").textContent = "⏰ Tempo esgotado! Fim de jogo.";
+
+    // Desabilita botões de operador
+    document.querySelectorAll(".operador").forEach(btn => {
+        btn.disabled = true;
+    });
+
+    // Desabilita os números
+    document.querySelectorAll(".numero").forEach(div => {
+        div.classList.add("usado");
+        div.style.pointerEvents = "none";
+    });
+
+    // Desativa botão Calcular
+    document.querySelector("button.btn-success")?.setAttribute("disabled", "true");
+
+    // Mensagem adicional
+    mostrarMensagemFinal();
+    // Reativa botão sortear e remove botão desistir
+    document.getElementById("sortear").disabled = false;
+    removerBotaoDesistir();
+}
+
+function mostrarMensagemFinal() {
+    const msgDiv = document.getElementById("mensagem-final");
+    msgDiv.className = "alert alert-info";
+    msgDiv.textContent = `Pontuação final: ${pontuacao} ponto(s)!`;
+}
+
+function limparMensagemFinal() {
+    const msgDiv = document.getElementById("mensagem-final");
+    msgDiv.textContent = "";
+    msgDiv.className = "";
+}
+
+function adicionarBotaoDesistir() {
+    if (document.getElementById("btn-desistir")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "btn-desistir";
+    btn.textContent = "Desistir";
+    btn.className = "btn btn-secondary";
+    btn.onclick = () => {
+        clearInterval(intervaloTempo);
+        encerrarJogo();
+    };
+
+    // Inserir dentro do container controles, ao lado do sortear
+    document.getElementById("controles").appendChild(btn);
+}
+
+function removerBotaoDesistir() {
+    const btn = document.getElementById("btn-desistir");
+    if (btn) btn.remove();
+}
+
 
 document.getElementById("sortear").addEventListener("click", sortearNumeros);
 
