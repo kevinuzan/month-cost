@@ -1,0 +1,86 @@
+/* public/css/login.css */
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Garante que a página ocupe a altura total da viewport */
+    background: linear-gradient(135deg, #f8f9fa, #e0f7fa); /* Seu gradiente existente */
+    font-family: 'Rubik', sans-serif;
+    color: #333;
+}
+
+.login-container {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    width: 90%;
+    transform: translateY(-20px); /* Levemente para cima para centralizar visualmente */
+    animation: fadeIn 0.8s ease-out; /* Adiciona uma animação de fade-in */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-20px);
+    }
+}
+
+.login-container h1 {
+    color: #0d6efd; /* Sua cor primária */
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.login-text {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+.btn-google-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4285F4; /* Cor do Google Blue */
+    color: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1.2em;
+    font-weight: 700;
+    text-decoration: none; /* Remove sublinhado do link */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-google-login:hover {
+    background-color: #357ae8; /* Tom mais escuro no hover */
+    transform: translateY(-2px); /* Efeito de leve elevação */
+    color: white; /* Garante que o texto continue branco no hover */
+}
+
+.btn-google-login .fab {
+    font-size: 1.4em;
+    margin-right: 10px;
+}
+
+/* Para dispositivos menores */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 30px;
+    }
+    .login-container h1 {
+        font-size: 2.5em;
+    }
+    .btn-google-login {
+        padding: 12px 25px;
+        font-size: 1.1em;
+    }
+}

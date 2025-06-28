@@ -5,7 +5,8 @@ let expressaoCorreta = "";
 let todasSolucoes = [];
 let expCorretasRespondidas = new Set();
 let pontuacao = 0;
-let modoSelecionado = "livre";
+let modoSelecionadoBase = "livre"; // Variável para a parte base do modo (livre, tempo, speedrun)
+let modoSelecionadoCompleto = "livre"; // Variável para o modo completo (livre, tempo-1, speedrun-3)
 let tempoLimiteSegundos = 0;
 let tempoRestante = 0;
 let intervaloTempo = null;
@@ -31,25 +32,28 @@ function atualizarCronometro() {
 }
 
 function sortearNumeros() {
+    // teste();
     // Reativa operadores e botão calcular
     document.querySelectorAll(".operador").forEach(btn => btn.disabled = false);
     document.querySelector("button.btn-success")?.removeAttribute("disabled");
     limparMensagemFinal();
 
+    // Esconde o botão e ranking
+    document.getElementById("ranking-container").innerHTML = "";
+
     // Remove mensagens antigas
     document.querySelectorAll(".alert").forEach(el => el.remove());
 
-
-
     const modoRaw = document.getElementById("modoJogo").value;
-    modoSelecionado = modoRaw.split("-")[0]; // "livre", "tempo", "speedrun"
+    modoSelecionadoCompleto = modoRaw; // Guarda o valor completo
+    modoSelecionadoBase = modoRaw.split("-")[0]; // "livre", "tempo", "speedrun"
     tempoLimiteSegundos = parseInt(modoRaw.split("-")[1]) * 60 || 0;
 
 
     clearInterval(intervaloTempo);
     document.getElementById("cronometro").textContent = "";
 
-    if (modoSelecionado === "tempo" || modoSelecionado === "speedrun") {
+    if (modoSelecionadoBase === "tempo" || modoSelecionadoBase === "speedrun") {
         tempoRestante = tempoLimiteSegundos;
         atualizarCronometro();
 
@@ -69,7 +73,7 @@ function sortearNumeros() {
     adicionarBotaoResetarPontuacao();
 
     // Se for modo de tempo ou speedrun, desativa "Sortear" e ativa "Desistir"
-    if (modoSelecionado === "tempo" || modoSelecionado === "speedrun") {
+    if (modoSelecionadoBase === "tempo" || modoSelecionadoBase === "speedrun") {
         document.getElementById("sortear").disabled = true;
         adicionarBotaoDesistir();
     } else {
@@ -77,7 +81,7 @@ function sortearNumeros() {
     }
 
     // Se for modo de tempo ou speedrun, desativa "Sortear" e ativa "Desistir"
-    if (modoSelecionado === "speedrun") {
+    if (modoSelecionadoBase === "speedrun") {
         adicionarBotaoPular();
     } else {
         removerBotaoPular();
@@ -233,11 +237,12 @@ function calcular() {
             atualizarContadorSolucoes();
 
 
-            const modoRaw = document.getElementById("modoJogo").value;
-            modoSelecionado = modoRaw.split("-")[0]; // "livre", "tempo", "speedrun"
+            // O modo já é pego no sortearNumeros e guardado em modoSelecionadoBase
+            // const modoRaw = document.getElementById("modoJogo").value;
+            // modoSelecionadoBase = modoRaw.split("-")[0];
 
             // Se for modo de speedrun, e acertar, passa para a próxima
-            if (modoSelecionado === "speedrun") {
+            if (modoSelecionadoBase === "speedrun") {
                 sorteiaNovoNumero();
             }
         } else {
@@ -488,10 +493,37 @@ function encerrarJogo() {
     removerBotaoPular();
 }
 
-function mostrarMensagemFinal() {
+async function mostrarMensagemFinal() {
     const msgDiv = document.getElementById("mensagem-final");
     msgDiv.className = "alert alert-info";
     msgDiv.textContent = `Pontuação final: ${pontuacao} ponto(s)!`;
+
+    // Exibe a pontuação final no modal
+    document.getElementById("pontuacao-final-modal").textContent = pontuacao;
+
+    if (pontuacao > 0) {
+        var userID = localStorage.getItem('currentUserId');
+        var userName = localStorage.getItem('currentUserName');
+
+        // Garante que o modo completo seja enviado
+        await insertRanking(userID, userName, pontuacao, modoSelecionadoCompleto);
+    }
+
+    // Adicionar o botão de Ranking
+    const rankingContainer = document.getElementById("ranking-container");
+    rankingContainer.innerHTML = `
+        <button id="btn-mostrar-ranking" class="btn btn-info btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#rankingModal">
+            Ver Ranking <i class="fas fa-trophy ms-2"></i>
+        </button>
+    `;
+
+    // Carregar o ranking e as pontuações do usuário assim que o botão é exibido
+    // Para que estejam prontas quando o modal abrir
+    loadUserBestScores();
+    loadGlobalRanking();
+
+    // Adiciona listener para o filtro de modo no ranking
+    document.getElementById('rankingModeFilter').addEventListener('change', loadGlobalRanking);
 }
 
 function limparMensagemFinal() {
@@ -565,4 +597,158 @@ document.getElementById("limpar").addEventListener("click", () => {
     document.getElementById("resultado").textContent = "?";
     document.getElementById("resposta-correta").textContent = "";
 });
+
+async function fetchGet(url) {
+    const resp = await fetch(url, {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json; charset=UTF-8;",
+        }
+    });
+
+    // Handle any errors please
+
+    const data = await resp.json();
+    return data
+}
+
+async function fetchPost(url) {
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json; charset=UTF-8;",
+        }
+    });
+
+
+    const data = await resp.json();
+    return data
+}
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/api/currentUser');
+        if (response.ok) {
+            const user = await response.json();
+            // console.log("Usuário logado:", user);
+            // Exiba as informações do usuário na página do jogo
+            const welcomeMessage = document.getElementById('welcome-message'); // Supondo que você tenha um elemento com esse ID
+            if (welcomeMessage) {
+                welcomeMessage.textContent = `Bem-vindo ao MateMatchKA, ${user.displayName}!`;
+            }
+
+            // Armazene o ID do usuário para uso no jogo, se necessário (ex: para salvar pontuações associadas a ele)
+            localStorage.setItem('currentUserId', user.id);
+            localStorage.setItem('currentUserName', user.displayName);
+
+        } else if (response.status === 401) {
+            console.log("Usuário não autenticado. Redirecionando para login...");
+            window.location.href = '/auth/google'; // Redireciona para o login se não estiver autenticado
+        } else {
+            console.error("Erro ao carregar dados do usuário:", response.statusText);
+        }
+    } catch (error) {
+        console.error("Erro na requisição da API de usuário:", error);
+    }
+});
+
 sortearNumeros()
+
+
+// async function teste() {
+//     var userRole1 = await fetchGet(`/getPontuacao`)
+//     console.log(userRole1.rows[0])
+// }
+
+
+// Nova função para buscar e exibir o ranking geral
+async function loadGlobalRanking() {
+    const rankingListBody = document.querySelector("#global-ranking-list tbody");
+    const filterMode = document.getElementById('rankingModeFilter').value;
+
+    rankingListBody.innerHTML = '<tr><td colspan="5">Carregando ranking...</td></tr>'; // Limpa e mostra mensagem de carregamento
+
+    try {
+        const url = filterMode ? `/getRanking?modo=${encodeURIComponent(filterMode)}` : '/getRanking';
+        const response = await fetchGet(url); // Use sua função fetchGet
+
+        if (response.sucesso && response.ranking) {
+            rankingListBody.innerHTML = ''; // Limpa antes de preencher
+            if (response.ranking.length === 0) {
+                rankingListBody.innerHTML = '<tr><td colspan="5">Nenhuma pontuação encontrada para este modo.</td></tr>';
+            } else {
+                response.ranking.forEach((entry, index) => {
+                    const row = rankingListBody.insertRow();
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${entry.nome}</td>
+                        <td>${entry.pontuacao}</td>
+                        <td>${entry.modo}</td>
+                        <td>${new Date(entry.data).toLocaleDateString('pt-BR')}</td>
+                    `;
+                });
+            }
+        } else {
+            rankingListBody.innerHTML = `<tr><td colspan="5">Erro ao carregar ranking: ${response.erro || 'Desconhecido'}</td></tr>`;
+        }
+    } catch (error) {
+        console.error("Erro ao buscar ranking global:", error);
+        rankingListBody.innerHTML = `<tr><td colspan="5">Erro de conexão ao buscar ranking.</td></tr>`;
+    }
+}
+
+// Nova função para buscar e exibir as melhores pontuações do usuário logado
+async function loadUserBestScores() {
+    const userBestScoresDiv = document.getElementById("user-best-scores");
+    userBestScoresDiv.innerHTML = '<p class="text-muted">Carregando suas pontuações...</p>'; // Limpa e mostra mensagem de carregamento
+
+    try {
+        const response = await fetchGet('/getUserScores'); // Use sua função fetchGet
+
+        if (response.sucesso && response.userScores) {
+            userBestScoresDiv.innerHTML = ''; // Limpa antes de preencher
+            const modes = Object.keys(response.userScores);
+
+            if (modes.length === 0) {
+                userBestScoresDiv.innerHTML = '<p class="text-muted">Você ainda não tem pontuações registradas.</p>';
+            } else {
+                modes.forEach(mode => {
+                    const scores = response.userScores[mode];
+                    if (scores.length > 0) {
+                        const modeTitle = document.createElement('h6');
+                        modeTitle.textContent = `Modo: ${mode}`;
+                        userBestScoresDiv.appendChild(modeTitle);
+
+                        const ul = document.createElement('ul');
+                        ul.className = 'list-group list-group-flush mb-2';
+                        scores.forEach(score => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            li.textContent = `Pontuação: ${score.pontuacao} (${new Date(score.data).toLocaleDateString('pt-BR')})`;
+                            ul.appendChild(li);
+                        });
+                        userBestScoresDiv.appendChild(ul);
+                    }
+                });
+            }
+        } else {
+            userBestScoresDiv.innerHTML = `<p class="text-danger">Erro ao carregar suas pontuações: ${response.erro || 'Desconhecido'}</p>`;
+        }
+    } catch (error) {
+        console.error("Erro ao buscar pontuações do usuário:", error);
+        userBestScoresDiv.innerHTML = '<p class="text-danger">Erro de conexão ao buscar suas pontuações.</p>';
+    }
+}
+
+// Atualize sua função insertRanking para passar o modoSelecionadoCompleto
+async function insertRanking(userId, nome, pontuacao, modoCompleto) {
+    const hoje = new Date().toISOString().split('T')[0]; // retorna "2025-06-27"
+
+    // O modo de jogo já inclui o tempo (ex: "tempo-60", "speedrun-300")
+    var dadosToSend = userId + "###" + nome + "###" + pontuacao + "###" + hoje + "###" + modoCompleto;
+
+    // console.log("Enviando dados para ranking:", dadosToSend);
+    var result = await fetchGet(`/insertPontuacao?name=${encodeURIComponent(dadosToSend)}`);
+    // console.log("Resposta do insertRanking:", result);
+}

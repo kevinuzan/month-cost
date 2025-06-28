@@ -18,7 +18,8 @@
 
 <body>
     <div class="container text-center mt-5">
-        <h1 class="mb-4">MateMatchKA</h1>
+        <h1 id="welcome-message">Carregando usuário...</h1>
+        <!-- <h1 class="mb-4">MateMatchKA</h1> -->
         <p class="mb-4">Use os números e operadores para encontrar o resultado exato. Exercite sua mente com desafios
             matemáticos divertidos!</p>
 
@@ -76,6 +77,62 @@
         <h4 class="mb-3">Número a Alcançar: <span id="alvo" class="text-primary fw-bold">?</span></h4>
         <h5 id="cronometro" class="text-danger mt-3"></h5>
         <div id="mensagem-final" class="mt-2"></div>
+        <div id="ranking-container" class="mt-4">
+        </div>
+
+        <div class="modal fade" id="rankingModal" tabindex="-1" aria-labelledby="rankingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rankingModalLabel">Ranking MateMatchKA</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h4 class="text-center mb-3">Sua Pontuação Final: <span id="pontuacao-final-modal"
+                                class="text-primary fw-bold"></span></h4>
+                        <h5 class="mt-4 mb-3">Suas Melhores Pontuações:</h5>
+                        <div id="user-best-scores">
+                            <p class="text-muted">Carregando suas pontuações...</p>
+                        </div>
+
+                        <h5 class="mt-5 mb-3">Ranking Geral (Top 10):</h5>
+                        <div class="form-group mb-3">
+                            <label for="rankingModeFilter" class="form-label">Filtrar por Modo:</label>
+                            <select id="rankingModeFilter" class="form-select w-auto mx-auto">
+                                <option value="">Todos os Modos</option>
+                                <option value="livre">Modo Livre</option>
+                                <option value="tempo">Modo Tempo</option>
+                                <option value="speedrun">Modo SpeedRun</option>
+                                <option value="1x1" disabled>1x1 (em breve)</option>
+                            </select>
+                        </div>
+                        <div id="global-ranking-list" class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Posição</th>
+                                        <th>Nome</th>
+                                        <th>Pontuação</th>
+                                        <th>Modo</th>
+                                        <th>Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="5">Carregando ranking...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
         <p id="contador-solucoes" class="mt-2 text-center">Soluções restantes: ?</p>
         <div id="numeros" class="d-flex justify-content-center flex-wrap gap-3 mb-4"></div>
