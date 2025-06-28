@@ -75,6 +75,13 @@ function sortearNumeros() {
     } else {
         removerBotaoDesistir();
     }
+
+    // Se for modo de tempo ou speedrun, desativa "Sortear" e ativa "Desistir"
+    if (modoSelecionado === "speedrun") {
+        adicionarBotaoPular();
+    } else {
+        removerBotaoPular();
+    }
 }
 
 function sorteiaNovoNumero() {
@@ -478,6 +485,7 @@ function encerrarJogo() {
     // Reativa botão sortear e remove botão desistir
     document.getElementById("sortear").disabled = false;
     removerBotaoDesistir();
+    removerBotaoPular();
 }
 
 function mostrarMensagemFinal() {
@@ -510,6 +518,29 @@ function adicionarBotaoDesistir() {
 
 function removerBotaoDesistir() {
     const btn = document.getElementById("btn-desistir");
+    if (btn) btn.remove();
+    removerBotaoPular();
+}
+
+
+
+function adicionarBotaoPular() {
+    if (document.getElementById("btn-pular")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "btn-pular";
+    btn.textContent = "Pular";
+    btn.className = "btn btn-secondary";
+    btn.onclick = () => {
+        sorteiaNovoNumero();
+    };
+
+    // Inserir dentro do container controles, ao lado do sortear
+    document.getElementById("controles").appendChild(btn);
+}
+
+function removerBotaoPular() {
+    const btn = document.getElementById("btn-pular");
     if (btn) btn.remove();
 }
 
