@@ -12,7 +12,7 @@ import passport from "passport";
 import session from "express-session";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
-// Defina os modos completos que podem ser inseridos
+// Certifique-se que essas constantes estão aqui, antes da definição das rotas.
 const ALL_MODOS_COMPLETOS_VALIDOS = [
   'livre',
   'tempo-1', 'tempo-3', 'tempo-5', 'tempo-10',
@@ -20,15 +20,33 @@ const ALL_MODOS_COMPLETOS_VALIDOS = [
   '1x1'
 ];
 
-// Defina os modos que o filtro do ranking aceita (os "modos base" ou o completo 'livre')
 const MODOS_DE_FILTRO_RANKING_VALIDOS = [
-  '', // Para "Todos os Modos"
+  '', // "Todos os Modos"
   'livre',
-  'tempo', // Abrange tempo-1, tempo-3, etc.
-  'speedrun', // Abrange speedrun-1, speedrun-3, etc.
+  'tempo_all', // Novo filtro geral para tempo
+  'tempo-1', 'tempo-3', 'tempo-5', 'tempo-10', // Filtros específicos de tempo
+  'speedrun_all', // Novo filtro geral para speedrun
+  'speedrun-1', 'speedrun-3', 'speedrun-5', 'speedrun-10', // Filtros específicos de speedrun
   '1x1'
 ];
 
+// Opcional: Se você quiser validar o modo de filtro, pode fazer assim:
+const DIFICULDADES_DE_FILTRO_RANKING_VALIDAS = [
+  '', // Para "Todas as Dificuldades"
+  'facil',
+  'normal',
+  'medio',
+  'dificil'
+];
+
+
+// Novas constantes para as dificuldades válidas
+const DIFICULDADES_VALIDAS = [
+  'facil',
+  'normal',
+  'medio',
+  'dificil'
+];
 var app = express();
 var server = createServer(app);
 server.listen(process.env.PORT || 3000);
@@ -215,35 +233,52 @@ app.get('/getPontuacao', async function (req, res) {
 
 // ... (seus imports e configurações)
 
+// ROTA PARA OBTER O RANKING
 app.get('/getRanking', async (req, res) => {
   try {
-    const modoFiltro = req.query.modo; // O modo enviado pelo filtro (ex: "tempo", "speedrun", "livre", "")
+    const modoFiltro = req.query.modo; // Ex: "tempo_all", "tempo-1", "livre", ""
+    const dificuldadeFiltro = req.query.dificuldade; // Ex: "facil", "medio", ""
     const limit = parseInt(req.query.limit || 10, 10);
 
     let query = `
-            SELECT usersId, nome, pontuacao, modo, data
+            SELECT usersId, nome, pontuacao, modo, dificuldade, data
             FROM ranking_table
         `;
     let params = [];
     let whereClauses = [];
     let paramIndex = 1;
 
-    // Valida o modoFiltro para evitar SQL Injection ou valores inesperados
+    // --- Validações de Filtro ---
     if (modoFiltro && !MODOS_DE_FILTRO_RANKING_VALIDOS.includes(modoFiltro)) {
       return res.status(400).json({ sucesso: false, erro: 'Modo de filtro de ranking inválido.' });
     }
+    if (dificuldadeFiltro && !DIFICULDADES_DE_FILTRO_RANKING_VALIDAS.includes(dificuldadeFiltro)) {
+      return res.status(400).json({ sucesso: false, erro: 'Dificuldade de filtro de ranking inválida.' });
+    }
+    // --- Fim das Validações de Filtro ---
 
+    // Lógica para filtro de MODO
     if (modoFiltro) {
-      if (modoFiltro === 'livre' || modoFiltro === '1x1') {
-        // Para 'livre' ou '1x1', busca correspondência exata
+      if (modoFiltro === 'livre' || modoFiltro === '1x1' ||
+        modoFiltro.startsWith('tempo-') || modoFiltro.startsWith('speedrun-')) {
+        // Se for "livre", "1x1" ou um modo específico com tempo (tempo-1, speedrun-5), usa correspondência EXATA
         whereClauses.push(`modo = $${paramIndex++}`);
         params.push(modoFiltro);
-      } else if (modoFiltro === 'tempo' || modoFiltro === 'speedrun') {
-        // Para 'tempo' ou 'speedrun', usa LIKE para buscar todos os variantes
+      } else if (modoFiltro === 'tempo_all') {
+        // Se for "tempo_all", usa LIKE para pegar todos os modos que começam com "tempo"
         whereClauses.push(`modo LIKE $${paramIndex++}`);
-        params.push(`${modoFiltro}%`); // Ex: 'tempo%' para pegar 'tempo-1', 'tempo-3'
+        params.push(`tempo%`);
+      } else if (modoFiltro === 'speedrun_all') {
+        // Se for "speedrun_all", usa LIKE para pegar todos os modos que começam com "speedrun"
+        whereClauses.push(`modo LIKE $${paramIndex++}`);
+        params.push(`speedrun%`);
       }
-      // Se modoFiltro for vazio, não adiciona WHERE clause
+    }
+
+    // Lógica para filtro de DIFICULDADE (permanece a mesma)
+    if (dificuldadeFiltro) {
+      whereClauses.push(`dificuldade = $${paramIndex++}`);
+      params.push(dificuldadeFiltro);
     }
 
     if (whereClauses.length > 0) {
@@ -267,54 +302,47 @@ app.get('/getRanking', async (req, res) => {
 
 
 // ROTA PARA OBTER AS PONTUAÇÕES DO USUÁRIO LOGADO (para mostrar a ele as 5 melhores)
+// Exemplo da rota getUserScores para referência, não precisa mudar
 app.get('/getUserScores', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ sucesso: false, erro: 'Não autenticado.' });
   }
-  const userId = req.user.id; // O ID do usuário logado do seu banco de dados
+  const userId = req.user.id;
 
   try {
-    // Obter as pontuações do usuário, ainda pode ser mais do que 5 por modo
-    // O agrupamento e limite por 5 por modo será feito no frontend como antes,
-    // pois é mais simples para exibir as categorias.
-
     const { rows } = await pgClient.query(
-      `SELECT usersId, nome, pontuacao, modo, data
+      `SELECT usersId, nome, pontuacao, modo, dificuldade, data -- Adicione 'dificuldade' aqui
              FROM ranking_table
              WHERE usersId = $1
-             ORDER BY pontuacao DESC, data ASC`, // Ordena para pegar as melhores primeiro
+             ORDER BY pontuacao DESC, data ASC`,
       [userId]
     );
 
-    // Agrupar por modo e pegar apenas os top 5 de cada modo
-    const userScoresByMode = {};
+    const userScoresByModeAndDifficulty = {};
     rows.forEach(score => {
-      if (!userScoresByMode[score.modo]) {
-        userScoresByMode[score.modo] = [];
+      const key = `${score.modo}-${score.dificuldade}`; // Chave composta para agrupar
+      if (!userScoresByModeAndDifficulty[key]) {
+        userScoresByModeAndDifficulty[key] = [];
       }
-      // A lógica de manter os 5 melhores por modo já é feita na inserção.
-      // Aqui estamos apenas exibindo o que foi salvo.
-      // Se você quiser garantir que apenas 5 são *retornados* aqui, pode adicionar:
-      // if (userScoresByMode[score.modo].length < 5) {
-      userScoresByMode[score.modo].push(score);
-      // }
+      if (userScoresByModeAndDifficulty[key].length < 5) {
+        userScoresByModeAndDifficulty[key].push(score);
+      }
     });
 
-
-    res.json({ sucesso: true, userScores: userScoresByMode });
+    res.json({ sucesso: true, userScores: userScoresByModeAndDifficulty }); // Altere aqui para o novo objeto
   } catch (e) {
     console.error("Erro ao obter pontuações do usuário:", e);
     res.status(500).json({ sucesso: false, erro: e.message });
   }
 });
 
+
 app.get('/insertPontuacao', async function (req, res) {
   try {
     const dados = req.query.name;
-    // console.log(dados)
-    // Agora esperamos 5 partes: usersId, nome, pontuacao, data, modo
-    const [usersIdStr, nome, pontuacaoStr, data, modo] = dados.split('###');
-
+    console.log(dados); // Para debug, se precisar
+    // Agora esperamos 6 partes: usersId, nome, pontuacao, data, modo, dificuldade
+    const [usersIdStr, nome, pontuacaoStr, data, modo, dificuldade] = dados.split('###');
 
     const userId = parseInt(usersIdStr, 10);
     const pontuacao = parseInt(pontuacaoStr, 10);
@@ -326,21 +354,28 @@ app.get('/insertPontuacao', async function (req, res) {
     if (!modo || !ALL_MODOS_COMPLETOS_VALIDOS.includes(modo)) {
       return res.status(400).json({ sucesso: false, erro: 'Modo de jogo inválido ou não fornecido.' });
     }
+    // Validação da dificuldade
+    if (!dificuldade || !DIFICULDADES_VALIDAS.includes(dificuldade)) {
+      return res.status(400).json({ sucesso: false, erro: 'Dificuldade inválida ou não fornecida.' });
+    }
     // --- Fim das Novas Validações ---
 
-    // 1. Contar quantos registros o usuário já tem PARA ESTE MODO ESPECÍFICO
+    // As operações de banco de dados agora precisam incluir a `dificuldade`
+    // para manter o ranking top 5 por (usuário, modo, dificuldade)
+
+    // 1. Contar quantos registros o usuário já tem PARA ESTE MODO E DIFICULDADE ESPECÍFICOS
     const countResult = await pgClient.query(
-      'SELECT COUNT(*) AS total_records FROM ranking_table WHERE usersId = $1 AND modo = $2',
-      [userId, modo]
+      'SELECT COUNT(*) AS total_records FROM ranking_table WHERE usersId = $1 AND modo = $2 AND dificuldade = $3',
+      [userId, modo, dificuldade]
     );
     const totalRecords = parseInt(countResult.rows[0].total_records, 10);
 
-    // 2. Obter a menor pontuação atual do usuário PARA ESTE MODO ESPECÍFICO, se houver 5 ou mais registros
+    // 2. Obter a menor pontuação atual do usuário PARA ESTE MODO E DIFICULDADE ESPECÍFICOS, se houver 5 ou mais registros
     let lowestScore = -1;
     if (totalRecords >= 5) {
       const lowestScoreResult = await pgClient.query(
-        'SELECT pontuacao FROM ranking_table WHERE usersId = $1 AND modo = $2 ORDER BY pontuacao ASC, data ASC LIMIT 1',
-        [userId, modo]
+        'SELECT pontuacao FROM ranking_table WHERE usersId = $1 AND modo = $2 AND dificuldade = $3 ORDER BY pontuacao ASC, data ASC LIMIT 1',
+        [userId, modo, dificuldade]
       );
       if (lowestScoreResult.rows.length > 0) {
         lowestScore = lowestScoreResult.rows[0].pontuacao;
@@ -348,28 +383,27 @@ app.get('/insertPontuacao', async function (req, res) {
     }
 
     // 3. Decidir se a nova pontuação deve ser inserida/substituída
-    // A lógica permanece a mesma, mas agora com a condição 'modo'
     if (totalRecords < 5) {
       await pgClient.query(
-        'INSERT INTO ranking_table (usersId, nome, pontuacao, data, modo) VALUES ($1, $2, $3, $4, $5)',
-        [userId, nome, pontuacao, data, modo]
+        'INSERT INTO ranking_table (usersId, nome, pontuacao, data, modo, dificuldade) VALUES ($1, $2, $3, $4, $5, $6)',
+        [userId, nome, pontuacao, data, modo, dificuldade]
       );
       res.json({ sucesso: true, message: 'Pontuação inserida.', action: 'inserted' });
     } else if (pontuacao > lowestScore) {
-      // Deletar o registro com a menor pontuação (e mais antigo em caso de empate) PARA ESTE MODO
+      // Deletar o registro com a menor pontuação (e mais antigo em caso de empate) PARA ESTE MODO E DIFICULDADE
       await pgClient.query(
         `DELETE FROM ranking_table
-                 WHERE id = (SELECT id FROM ranking_table WHERE usersId = $1 AND modo = $2 ORDER BY pontuacao ASC, data ASC LIMIT 1)`,
-        [userId, modo]
+                 WHERE id = (SELECT id FROM ranking_table WHERE usersId = $1 AND modo = $2 AND dificuldade = $3 ORDER BY pontuacao ASC, data ASC LIMIT 1)`,
+        [userId, modo, dificuldade]
       );
       // Inserir a nova pontuação
       await pgClient.query(
-        'INSERT INTO ranking_table (usersId, nome, pontuacao, data, modo) VALUES ($1, $2, $3, $4, $5)',
-        [userId, nome, pontuacao, data, modo]
+        'INSERT INTO ranking_table (usersId, nome, pontuacao, data, modo, dificuldade) VALUES ($1, $2, $3, $4, $5, $6)',
+        [userId, nome, pontuacao, data, modo, dificuldade]
       );
       res.json({ sucesso: true, message: 'Pontuação atualizada (registro antigo removido).', action: 'updated' });
     } else {
-      // Pontuação não é alta o suficiente para entrar no top 5 para este modo
+      // Pontuação não é alta o suficiente para entrar no top 5 para este modo e dificuldade
       res.json({ sucesso: true, message: 'Pontuação não é alta o suficiente para entrar no top 5.', action: 'skipped' });
     }
 

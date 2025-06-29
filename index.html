@@ -96,15 +96,35 @@
                         </div>
 
                         <h5 class="mt-5 mb-3">Ranking Geral (Top 10):</h5>
-                        <div class="form-group mb-3">
-                            <label for="rankingModeFilter" class="form-label">Filtrar por Modo:</label>
-                            <select id="rankingModeFilter" class="form-select w-auto mx-auto">
-                                <option value="">Todos os Modos</option>
-                                <option value="livre">Modo Livre</option>
-                                <option value="tempo">Modo Tempo</option>
-                                <option value="speedrun">Modo SpeedRun</option>
-                                <option value="1x1" disabled>1x1 (em breve)</option>
-                            </select>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="rankingModeFilter" class="form-label">Filtrar por Modo:</label>
+                                <select id="rankingModeFilter" class="form-select">
+                                    <option value="">Todos os Modos</option>
+                                    <option value="livre">Modo Livre</option>
+                                    <option value="tempo_all">Modo Tempo (Todos os Períodos)</option>
+                                    <option value="tempo-1">Modo Tempo - 1 minuto</option>
+                                    <option value="tempo-3">Modo Tempo - 3 minutos</option>
+                                    <option value="tempo-5">Modo Tempo - 5 minutos</option>
+                                    <option value="tempo-10">Modo Tempo - 10 minutos</option>
+                                    <option value="speedrun_all">Modo SpeedRun (Todos os Períodos)</option>
+                                    <option value="speedrun-1">Modo SpeedRun - 1 minuto</option>
+                                    <option value="speedrun-3">Modo SpeedRun - 3 minutos</option>
+                                    <option value="speedrun-5">Modo SpeedRun - 5 minutos</option>
+                                    <option value="speedrun-10">Modo SpeedRun - 10 minutos</option>
+                                    <option value="1x1" disabled>1x1 (em breve)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="rankingDifficultyFilter" class="form-label">Filtrar por Dificuldade:</label>
+                                <select id="rankingDifficultyFilter" class="form-select">
+                                    <option value="">Todas as Dificuldades</option>
+                                    <option value="facil">Fácil</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="medio">Médio</option>
+                                    <option value="dificil">Difícil</option>
+                                </select>
+                            </div>
                         </div>
                         <div id="global-ranking-list" class="table-responsive">
                             <table class="table table-striped table-hover">
@@ -114,12 +134,13 @@
                                         <th>Nome</th>
                                         <th>Pontuação</th>
                                         <th>Modo</th>
+                                        <th>Dificuldade</th>
                                         <th>Data</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="5">Carregando ranking...</td>
+                                        <td colspan="6">Carregando ranking...</td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -522,8 +522,12 @@ async function mostrarMensagemFinal() {
     loadUserBestScores();
     loadGlobalRanking();
 
-    // Adiciona listener para o filtro de modo no ranking
+    // Adiciona listeners para os filtros de modo e DIFICULDADE no ranking
+    document.getElementById('rankingModeFilter').removeEventListener('change', loadGlobalRanking); // Remove para evitar duplicidade
+    document.getElementById('rankingDifficultyFilter').removeEventListener('change', loadGlobalRanking); // Remove para evitar duplicidade
+
     document.getElementById('rankingModeFilter').addEventListener('change', loadGlobalRanking);
+    document.getElementById('rankingDifficultyFilter').addEventListener('change', loadGlobalRanking);
 }
 
 function limparMensagemFinal() {
@@ -662,21 +666,33 @@ sortearNumeros()
 // }
 
 
-// Nova função para buscar e exibir o ranking geral
+// A função loadGlobalRanking é a que precisa ser atualizada
 async function loadGlobalRanking() {
     const rankingListBody = document.querySelector("#global-ranking-list tbody");
     const filterMode = document.getElementById('rankingModeFilter').value;
+    const filterDifficulty = document.getElementById('rankingDifficultyFilter').value; // Novo filtro de dificuldade
 
-    rankingListBody.innerHTML = '<tr><td colspan="5">Carregando ranking...</td></tr>'; // Limpa e mostra mensagem de carregamento
+    rankingListBody.innerHTML = '<tr><td colspan="6">Carregando ranking...</td></tr>'; // Colspan ajustado para 6
 
     try {
-        const url = filterMode ? `/getRanking?modo=${encodeURIComponent(filterMode)}` : '/getRanking';
-        const response = await fetchGet(url); // Use sua função fetchGet
+        let url = '/getRanking?';
+        const params = new URLSearchParams();
+
+        if (filterMode) {
+            params.append('modo', filterMode);
+        }
+        if (filterDifficulty) {
+            params.append('dificuldade', filterDifficulty);
+        }
+
+        url += params.toString(); // Constrói a URL com os parâmetros de modo e dificuldade
+
+        const response = await fetchGet(url);
 
         if (response.sucesso && response.ranking) {
-            rankingListBody.innerHTML = ''; // Limpa antes de preencher
+            rankingListBody.innerHTML = '';
             if (response.ranking.length === 0) {
-                rankingListBody.innerHTML = '<tr><td colspan="5">Nenhuma pontuação encontrada para este modo.</td></tr>';
+                rankingListBody.innerHTML = '<tr><td colspan="6">Nenhuma pontuação encontrada para esta combinação de filtros.</td></tr>'; // Colspan ajustado
             } else {
                 response.ranking.forEach((entry, index) => {
                     const row = rankingListBody.insertRow();
@@ -685,39 +701,43 @@ async function loadGlobalRanking() {
                         <td>${entry.nome}</td>
                         <td>${entry.pontuacao}</td>
                         <td>${entry.modo}</td>
-                        <td>${new Date(entry.data).toLocaleDateString('pt-BR')}</td>
+                        <td>${entry.dificuldade || 'N/A'}</td> <td>${new Date(entry.data).toLocaleDateString('pt-BR')}</td>
                     `;
                 });
             }
         } else {
-            rankingListBody.innerHTML = `<tr><td colspan="5">Erro ao carregar ranking: ${response.erro || 'Desconhecido'}</td></tr>`;
+            rankingListBody.innerHTML = `<tr><td colspan="6">Erro ao carregar ranking: ${response.erro || 'Desconhecido'}</td></tr>`; // Colspan ajustado
         }
     } catch (error) {
         console.error("Erro ao buscar ranking global:", error);
-        rankingListBody.innerHTML = `<tr><td colspan="5">Erro de conexão ao buscar ranking.</td></tr>`;
+        rankingListBody.innerHTML = `<tr><td colspan="6">Erro de conexão ao buscar ranking.</td></tr>`; // Colspan ajustado
     }
 }
 
-// Nova função para buscar e exibir as melhores pontuações do usuário logado
+
+// Atualizar a função loadUserBestScores para exibir a dificuldade
 async function loadUserBestScores() {
     const userBestScoresDiv = document.getElementById("user-best-scores");
-    userBestScoresDiv.innerHTML = '<p class="text-muted">Carregando suas pontuações...</p>'; // Limpa e mostra mensagem de carregamento
+    userBestScoresDiv.innerHTML = '<p class="text-muted">Carregando suas pontuações...</p>';
 
     try {
-        const response = await fetchGet('/getUserScores'); // Use sua função fetchGet
+        const response = await fetchGet('/getUserScores');
 
         if (response.sucesso && response.userScores) {
-            userBestScoresDiv.innerHTML = ''; // Limpa antes de preencher
-            const modes = Object.keys(response.userScores);
+            userBestScoresDiv.innerHTML = '';
+            const combinedModeDifficultyKeys = Object.keys(response.userScores);
 
-            if (modes.length === 0) {
+            if (combinedModeDifficultyKeys.length === 0) {
                 userBestScoresDiv.innerHTML = '<p class="text-muted">Você ainda não tem pontuações registradas.</p>';
             } else {
-                modes.forEach(mode => {
-                    const scores = response.userScores[mode];
+                combinedModeDifficultyKeys.sort(); // Opcional: ordenar as chaves
+                combinedModeDifficultyKeys.forEach(key => {
+                    const scores = response.userScores[key]; // Aqui 'key' é "modo-dificuldade"
                     if (scores.length > 0) {
+                        const [mode, difficulty] = key.split('-');
                         const modeTitle = document.createElement('h6');
-                        modeTitle.textContent = `Modo: ${mode}`;
+                        // Exemplo: "Modo: tempo-3 (Dificuldade: medio)"
+                        modeTitle.textContent = `Modo: ${mode} (Dificuldade: ${difficulty})`;
                         userBestScoresDiv.appendChild(modeTitle);
 
                         const ul = document.createElement('ul');
@@ -744,9 +764,9 @@ async function loadUserBestScores() {
 // Atualize sua função insertRanking para passar o modoSelecionadoCompleto
 async function insertRanking(userId, nome, pontuacao, modoCompleto) {
     const hoje = new Date().toISOString().split('T')[0]; // retorna "2025-06-27"
-
+    const dificuldade = document.getElementById("dificuldade").value;
     // O modo de jogo já inclui o tempo (ex: "tempo-60", "speedrun-300")
-    var dadosToSend = userId + "###" + nome + "###" + pontuacao + "###" + hoje + "###" + modoCompleto;
+    var dadosToSend = userId + "###" + nome + "###" + pontuacao + "###" + hoje + "###" + modoCompleto + "###" + dificuldade;
 
     // console.log("Enviando dados para ranking:", dadosToSend);
     var result = await fetchGet(`/insertPontuacao?name=${encodeURIComponent(dadosToSend)}`);
