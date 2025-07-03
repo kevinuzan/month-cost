@@ -745,7 +745,10 @@ async function loadUserBestScores() {
                         scores.forEach(score => {
                             const li = document.createElement('li');
                             li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                            li.textContent = `Pontuação: ${score.pontuacao} (${new Date(score.data).toLocaleDateString('pt-BR')})`;
+                            const dataIso = score.data.split('T')[0]; // '2025-07-03'
+                            const [ano, mes, dia] = dataIso.split('-');
+                            const dataFormatada = `${dia}/${mes}/${ano}`;
+                            li.textContent = `Pontuação: ${score.pontuacao} (${new Date(dataFormatada).toLocaleDateString('pt-BR')})`;
                             ul.appendChild(li);
                         });
                         userBestScoresDiv.appendChild(ul);
