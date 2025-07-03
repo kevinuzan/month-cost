@@ -1,136 +1,252 @@
-
 body {
-            font-family: 'Rubik', sans-serif;
-            background: linear-gradient(135deg, #f8f9fa, #e0f7fa);
-            color: #333;
-            transition: background 0.5s ease;
-        }
+    font-family: 'Rubik', sans-serif;
+    background: linear-gradient(135deg, #f8f9fa, #e0f7fa);
+    color: #333;
+    transition: background 0.5s ease;
+}
 
-        h1 {
-            font-weight: 700;
-            color: #0d6efd;
-        }
+h1 {
+    font-weight: 700;
+    color: #0d6efd;
+}
 
-        .numero {
-            width: 70px;
-            height: 70px;
-            background-color: #e0e0e0;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+.numero {
+    width: 70px;
+    height: 70px;
+    background-color: #e0e0e0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-        .numero:hover {
-            background-color: #cfd8dc;
-            transform: scale(1.05);
-        }
+.numero:hover {
+    background-color: #cfd8dc;
+    transform: scale(1.05);
+}
 
-        .numero.selecionado {
-            background-color: #0d6efd;
-            color: white;
-            font-weight: bold;
-            transform: scale(1.1);
-        }
+.numero.selecionado {
+    background-color: #0d6efd;
+    color: white;
+    font-weight: bold;
+    transform: scale(1.1);
+}
 
-        .operadores .btn {
-            margin: 0 8px;
-            font-size: 24px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
-        }
+.operadores .btn {
+    margin: 0 8px;
+    font-size: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
 
-        .operadores .btn:hover {
-            transform: scale(1.1);
-        }
+.operadores .btn:hover {
+    transform: scale(1.1);
+}
 
-        .display-operacao {
-            font-size: 22px;
-            min-height: 48px;
-            border: 1px solid #ced4da;
-            padding: 10px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+.display-operacao {
+    font-size: 22px;
+    min-height: 48px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
-        #resultado {
-            font-size: 22px;
-            color: #198754;
-        }
+#resultado {
+    font-size: 22px;
+    color: #198754;
+}
 
-        #resposta-correta {
-            font-size: 20px;
-            color: #dc3545;
-        }
+#resposta-correta {
+    font-size: 20px;
+    color: #dc3545;
+}
 
-        #todas-solucoes {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 10px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+#todas-solucoes {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
 
-        @media (max-width: 576px) {
-            .operadores .btn {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
+@media (max-width: 576px) {
+    .operadores .btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
 
-            .numero {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-            }
-        }
+    .numero {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+}
 
-        .feedback-correto {
-            animation: pulse 0.4s ease-in-out 2;
-            color: #198754 !important;
-        }
+.feedback-correto {
+    animation: pulse 0.4s ease-in-out 2;
+    color: #198754 !important;
+}
 
-        .feedback-erro {
-            animation: shake 0.4s ease-in-out 2;
-            color: #dc3545 !important;
-        }
+.feedback-erro {
+    animation: shake 0.4s ease-in-out 2;
+    color: #dc3545 !important;
+}
 
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
 
-            50% {
-                transform: scale(1.2);
-            }
+    50% {
+        transform: scale(1.2);
+    }
 
-            100% {
-                transform: scale(1);
-            }
-        }
+    100% {
+        transform: scale(1);
+    }
+}
 
-        @keyframes shake {
+@keyframes shake {
 
-            0%,
-            100% {
-                transform: translateX(0);
-            }
+    0%,
+    100% {
+        transform: translateX(0);
+    }
 
-            25% {
-                transform: translateX(-5px);
-            }
+    25% {
+        transform: translateX(-5px);
+    }
 
-            75% {
-                transform: translateX(5px);
-            }
-        }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+
+/* --- Estilos para o Modal de Ranking --- */
+
+/* Gradiente para o cabeçalho do modal (substitui bg-gradient-primary se você quiser um gradiente) */
+.modal-header.bg-gradient-primary {
+    background: linear-gradient(90deg, #0d6efd, #0b5ed7);
+    /* Azul mais escuro */
+    border-bottom: none;
+    /* Remove a borda inferior padrão se houver */
+}
+
+/* Títulos de seção com ícone */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* Espaçamento entre o título e o ícone */
+    color: #0d6efd;
+    /* Cor principal para os títulos de seção */
+    border-bottom: 2px solid #e0e0e0;
+    /* Linha sutil abaixo dos títulos */
+    padding-bottom: 8px;
+    margin-bottom: 20px !important;
+    /* Mais margem para separar seções */
+}
+
+.section-title h5 {
+    font-weight: 600;
+    /* Um pouco mais forte */
+}
+
+.section-title .icon-title {
+    font-size: 1.5rem;
+    /* Tamanho do ícone */
+    color: #198754;
+    /* Cor do ícone, por exemplo, verde */
+}
+
+/* Estilo para as melhores pontuações do usuário */
+#user-best-scores .list-group-item {
+    border: none;
+    /* Remove borda dos itens da lista */
+    padding-left: 0;
+    /* Alinha com o texto */
+    font-size: 0.95em;
+}
+
+#user-best-scores h6 {
+    color: #6c757d;
+    /* Cor para os subtítulos de modo/dificuldade */
+    font-weight: 500;
+    margin-top: 15px;
+    /* Espaço acima de cada modo de pontuação */
+    border-bottom: 1px dashed #e9ecef;
+    /* Linha pontilhada para separar modos */
+    padding-bottom: 5px;
+}
+
+/* Tabela de Ranking Global */
+#global-ranking-list table thead th {
+    background-color: #0d6efd;
+    /* Fundo do cabeçalho da tabela */
+    color: white;
+    font-weight: bold;
+    border-bottom: 2px solid #0a58ca;
+    /* Borda mais escura no cabeçalho */
+}
+
+#global-ranking-list table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa;
+    /* Fundo cinza claro para linhas ímpares (substitui table-striped) */
+}
+
+#global-ranking-list table tbody tr:hover {
+    background-color: #e9ecef;
+    /* Fundo mais escuro no hover */
+}
+
+#global-ranking-list table td {
+    vertical-align: middle;
+    /* Alinha o conteúdo da célula ao meio */
+    padding: 10px 8px;
+}
+
+/* Estilo para as posições (1, 2, 3) */
+#global-ranking-list table tbody tr:nth-child(1) td:first-child {
+    font-weight: bolder;
+    color: gold;
+    /* Ouro */
+    font-size: 1.2em;
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+#global-ranking-list table tbody tr:nth-child(2) td:first-child {
+    font-weight: bolder;
+    color: silver;
+    /* Prata */
+    font-size: 1.15em;
+    background-color: rgba(192, 192, 192, 0.1);
+}
+
+#global-ranking-list table tbody tr:nth-child(3) td:first-child {
+    font-weight: bolder;
+    color: #cd7f32;
+    /* Bronze */
+    font-size: 1.1em;
+    background-color: rgba(205, 127, 50, 0.1);
+}
+
+/* Estilo para o modal-footer */
+.modal-footer.bg-light {
+    border-top: none;
+    /* Remove a borda superior padrão */
+    padding-top: 20px;
+    padding-bottom: 20px;
+}

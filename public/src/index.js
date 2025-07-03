@@ -510,12 +510,12 @@ async function mostrarMensagemFinal() {
     }
 
     // Adicionar o botão de Ranking
-    const rankingContainer = document.getElementById("ranking-container");
-    rankingContainer.innerHTML = `
-        <button id="btn-mostrar-ranking" class="btn btn-info btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#rankingModal">
-            Ver Ranking <i class="fas fa-trophy ms-2"></i>
-        </button>
-    `;
+    // const rankingContainer = document.getElementById("ranking-container");
+    // rankingContainer.innerHTML = `
+    //     <button id="btn-mostrar-ranking" class="btn btn-info btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#rankingModal">
+    //         Ver Ranking <i class="fas fa-trophy ms-2"></i>
+    //     </button>
+    // `;
 
     // Carregar o ranking e as pontuações do usuário assim que o botão é exibido
     // Para que estejam prontas quando o modal abrir
@@ -659,12 +659,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 sortearNumeros()
 
+// Carregar o ranking e as pontuações do usuário assim que o botão é exibido
+// Para que estejam prontas quando o modal abrir
+loadUserBestScores();
+loadGlobalRanking();
 
-// async function teste() {
-//     var userRole1 = await fetchGet(`/getPontuacao`)
-//     console.log(userRole1.rows[0])
-// }
+// Adiciona listeners para os filtros de modo e DIFICULDADE no ranking
+document.getElementById('rankingModeFilter').removeEventListener('change', loadGlobalRanking); // Remove para evitar duplicidade
+document.getElementById('rankingDifficultyFilter').removeEventListener('change', loadGlobalRanking); // Remove para evitar duplicidade
 
+document.getElementById('rankingModeFilter').addEventListener('change', loadGlobalRanking);
+document.getElementById('rankingDifficultyFilter').addEventListener('change', loadGlobalRanking);
 
 // A função loadGlobalRanking é a que precisa ser atualizada
 async function loadGlobalRanking() {
@@ -696,12 +701,15 @@ async function loadGlobalRanking() {
             } else {
                 response.ranking.forEach((entry, index) => {
                     const row = rankingListBody.insertRow();
+                    const dataIso = entry.data.split('T')[0]; // '2025-07-03'
+                    const [ano, mes, dia] = dataIso.split('-');
+                    const dataFormatada = `${dia}/${mes}/${ano}`;
                     row.innerHTML = `
                         <td>${index + 1}</td>
                         <td>${entry.nome}</td>
                         <td>${entry.pontuacao}</td>
                         <td>${entry.modo}</td>
-                        <td>${entry.dificuldade || 'N/A'}</td> <td>${new Date(entry.data).toLocaleDateString('pt-BR')}</td>
+                        <td>${entry.dificuldade || 'N/A'}</td> <td>${dataFormatada}</td>
                     `;
                 });
             }
@@ -748,7 +756,7 @@ async function loadUserBestScores() {
                             const dataIso = score.data.split('T')[0]; // '2025-07-03'
                             const [ano, mes, dia] = dataIso.split('-');
                             const dataFormatada = `${dia}/${mes}/${ano}`;
-                            li.textContent = `Pontuação: ${score.pontuacao} (${new Date(dataFormatada).toLocaleDateString('pt-BR')})`;
+                            li.textContent = `Pontuação: ${score.pontuacao} (${dataFormatada})`;
                             ul.appendChild(li);
                         });
                         userBestScoresDiv.appendChild(ul);
