@@ -39,7 +39,7 @@ function sortearNumeros() {
     limparMensagemFinal();
 
     // Esconde o botão e ranking
-    document.getElementById("ranking-container").innerHTML = "";
+    // document.getElementById("ranking-container").innerHTML = "";
 
     // Remove mensagens antigas
     document.querySelectorAll(".alert").forEach(el => el.remove());
@@ -637,10 +637,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const user = await response.json();
             // console.log("Usuário logado:", user);
             // Exiba as informações do usuário na página do jogo
-            const welcomeMessage = document.getElementById('welcome-message'); // Supondo que você tenha um elemento com esse ID
-            if (welcomeMessage) {
-                welcomeMessage.textContent = `Bem-vindo ao MateMatchKA, ${user.displayName}!`;
-            }
+            // const welcomeMessage = document.getElementById('welcome-message'); // Supondo que você tenha um elemento com esse ID
+            // if (welcomeMessage) {
+            //     // welcomeMessage.textContent = `Bem-vindo ao MateMatchKA, ${user.displayName}!`;
+            //     welcomeMessage.textContent = `MateMatchKA`;
+            // }
 
             // Armazene o ID do usuário para uso no jogo, se necessário (ex: para salvar pontuações associadas a ele)
             localStorage.setItem('currentUserId', user.id);
@@ -745,7 +746,7 @@ async function loadUserBestScores() {
                         const [mode, difficulty] = key.split('-');
                         const modeTitle = document.createElement('h6');
                         // Exemplo: "Modo: tempo-3 (Dificuldade: medio)"
-                        modeTitle.textContent = `Modo: ${mode} (Dificuldade: ${difficulty})`;
+                        modeTitle.textContent = `Modo: ${mode} (Tempo: ${difficulty} min)`;
                         userBestScoresDiv.appendChild(modeTitle);
 
                         const ul = document.createElement('ul');

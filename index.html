@@ -6,27 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MateMatchKA</title>
 
-    <!-- Estilos -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet" />
 
-    <!-- Ícones -->
     <script src="https://kit.fontawesome.com/7113fe860c.js" crossorigin="anonymous"></script>
 
 </head>
 
 <body>
     <div class="container text-center mt-5">
-        <div style="position: fixed; top: 20px; right: 20px; z-index: 1050;">
-            <button id="btn-mostrar-ranking" class="btn btn-info btn-lg" data-bs-toggle="modal"
-                data-bs-target="#rankingModal">
-                Ver Ranking <i class="fas fa-trophy ms-2"></i>
+        <div style="position: fixed; top: 20px; left: 20px; z-index: 1050;">
+            <button id="btn-como-jogar" class="btn btn-primary btn-lg" data-bs-toggle="modal"
+                data-bs-target="#howToPlayModal">
+                <i class="fas fa-question-circle"></i>
             </button>
         </div>
 
-        <h1 id="welcome-message">Carregando usuário...</h1>
-        <!-- <h1 class="mb-4">MateMatchKA</h1> -->
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 1050;">
+            <button id="btn-mostrar-ranking" class="btn btn-info btn-lg" data-bs-toggle="modal"
+                data-bs-target="#rankingModal">
+                <i class="fas fa-trophy"></i>
+            </button>
+        </div>
+
+        <h1 id="welcome-message">MateMatchKA</h1>
         <p class="mb-4">Use os números e operadores para encontrar o resultado exato. Exercite sua mente com desafios
             matemáticos divertidos!</p>
 
@@ -77,9 +81,7 @@
         </div>
         <div id="controles" class="mb-4 d-flex justify-content-center gap-2">
             <button id="sortear" class="btn btn-primary">Sortear Números</button>
-            <!-- O botão desistir será inserido aqui via JS -->
         </div>
-        <!-- <button id="sortear" class="btn btn-primary mb-4">Sortear Números</button> -->
 
         <h4 class="mb-3">Número a Alcançar: <span id="alvo" class="text-primary fw-bold">?</span></h4>
         <h5 id="cronometro" class="text-danger mt-3"></h5>
@@ -168,6 +170,55 @@
             </div>
         </div>
 
+        <div class="modal fade" id="howToPlayModal" tabindex="-1" aria-labelledby="howToPlayModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-gradient-primary text-white">
+                        <h5 class="modal-title fs-4 fw-bold" id="howToPlayModalLabel">Como Jogar MateMatchKA</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <p class="lead mb-4">Regras básicas em MateMatchKA!</p>
+
+                        <img src="./img/instrucoes-do-jogo.png" class="img-fluid rounded shadow-sm mb-4"
+                            alt="Instruções do Jogo">
+
+                        <p class="text-start">
+                            <strong>Objetivo:</strong> Chegue ao número alvo usando os números sorteados e os operadores
+                            matemáticos (+, -, ×, ÷).<br>
+                            <strong>Passo a Passo:</strong><br>
+                            1. Selecione um número na área de números.<br>
+                            2. Selecione um operador (+, -, ×, ÷).<br>
+                            3. Selecione outro número.<br>
+                            4. O resultado da operação substituirá os números usados, criando um novo número para ser
+                            utilizado.<br>
+                            5. Continue combinando números até alcançar o alvo.<br>
+                            <br>
+                            <strong class="text-danger">ATENÇÃO IMPORTANTE:</strong>
+                            <span class="text-danger fw-bold">O jogo segue a ordem de inserção dos números, e NÃO as
+                                regras matemáticas de precedência.</span>
+                            <br>Por exemplo: <code class="bg-warning-subtle px-1 rounded">7 - 1 × 10</code> resulta em
+                            <code class="bg-warning-subtle px-1 rounded">60</code>, e não <code
+                                class="bg-warning-subtle px-1 rounded">-3</code>. O cálculo é feito sequencialmente da
+                            esquerda para a direita.<br>
+                            <br>
+
+                            <strong>Dicas:</strong><br>
+                            - Tente diferentes combinações!<br>
+                            - O modo "Livre" te dá tempo ilimitado para pensar.<br>
+                            - Nos modos "Tempo" e "SpeedRun", seja rápido para obter mais pontos!
+                        </p>
+                    </div>
+                    <div class="modal-footer bg-light border-top-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendi!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
         <p id="contador-solucoes" class="mt-2 text-center">Soluções restantes: ?</p>
@@ -194,15 +245,13 @@
         <h5 class="mt-4">Pontuação:</h5>
         <p class="fw-bold fs-4" id="pontuacao">0</p>
 
-        <h5 class="mt-4">Soluções Correto até agora:</h5>
+        <h5 class="mt-4">Soluções Corretas até agora:</h5>
         <ul id="acertos-unicos" class="text-start mx-auto"></ul>
     </div>
 
-    <!-- Áudios -->
     <audio id="som-acerto" src="https://www.myinstants.com/media/sounds/correct.mp3"></audio>
     <audio id="som-erro" src="https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3"></audio>
 
-    <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/src/index.js"></script>
 
