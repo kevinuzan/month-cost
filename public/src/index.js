@@ -10,7 +10,202 @@ let modoSelecionadoCompleto = "livre"; // Variável para o modo completo (livre,
 let tempoLimiteSegundos = 0;
 let tempoRestante = 0;
 let intervaloTempo = null;
+let ehHost = false;
 
+// ADIÇÕES NO TOPO DO index.js
+const socket = io();
+let salaId = null;
+let jogadorId = null;
+let pontuacaoOutro = 0;
+let codigoLink = "";
+
+function iniciarCronometro() {
+    tempoRestante = tempoLimiteSegundos;
+    atualizarCronometro();
+
+    intervaloTempo = setInterval(() => {
+        tempoRestante--;
+        atualizarCronometro();
+
+        if (tempoRestante <= 0) {
+            clearInterval(intervaloTempo);
+            encerrarJogo();
+        }
+    }, 1000);
+}
+
+// ================= MODAL PARA 1X1 ===================
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.createElement("div");
+    container.innerHTML = `
+        <div class="modal fade" id="modal1x1" tabindex="-1" aria-labelledby="modal1x1Label" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modal1x1Label">Modo 1x1</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <button id="btn-criar-sala" class="btn btn-success mb-3">Criar Sala</button>
+                <input id="codigo-sala" class="form-control mb-2" placeholder="Código da Sala" />
+                <button id="btn-entrar-sala" class="btn btn-primary">Entrar na Sala</button>
+                <p id="status-sala" class="mt-3 text-muted small"></p>
+                <div class="d-flex align-items-center gap-2">
+                    <input id="codigo-sala-copy" class="form-control" placeholder="Código da Sala" disabled/>
+                    <button id="btn-clipboard" class="btn btn-primary" onclick="copyToClipboard()">Copiar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    document.body.appendChild(container);
+
+    document.getElementById("modoJogo").addEventListener("change", (e) => {
+        if (e.target.value === "1x1") {
+            const modal = new bootstrap.Modal(document.getElementById("modal1x1"));
+            modal.show();
+            e.target.disabled = true; // bloqueia troca posterior
+        } else {
+            e.target.disabled = false;
+        }
+    });
+
+    document.getElementById("btn-criar-sala").addEventListener("click", () => {
+        socket.emit("criar-sala", (codigo) => {
+            salaId = codigo;
+            document.getElementById("status-sala").textContent = `Sala criada! Código: ${codigo}. Aguardando oponente...`;
+            document.getElementById("codigo-sala-copy").value = codigo
+            codigoLink = codigo
+
+        });
+    });
+    document.getElementById("btn-entrar-sala").addEventListener("click", () => {
+        const codigo = document.getElementById("codigo-sala").value;
+        socket.emit("entrar-sala", codigo, (res) => {
+            if (res.sucesso) {
+                salaId = codigo;
+                document.getElementById("status-sala").textContent = "Sala conectada! Aguarde início.";
+            } else {
+                alert("Erro: " + res.msg);
+            }
+        });
+    });
+});
+
+
+let modo1x1Ativo = false;
+
+document.getElementById("jogar1x1").addEventListener("click", () => {
+    const modal = new bootstrap.Modal(document.getElementById("modal1x1"));
+    modal.show();
+    modo1x1Ativo = true;
+});
+
+function copyToClipboard() {
+    navigator.clipboard.writeText(codigoLink);
+}
+// Evento: a sala foi preenchida com 2 jogadores
+socket.on("sala-pronta", ({ hostId }) => {
+    ehHost = (socket.id === hostId);
+    modoSelecionadoCompleto = "1x1";
+    modoSelecionadoBase = "1x1";
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modal1x1"));
+    if (modal) modal.hide(); // Fecha modal
+
+    if (ehHost) {
+        alert("Você é o host. Clique em Sortear Números para iniciar a partida.");
+    } else {
+        document.getElementById("sortear").disabled = true;
+        alert("Aguardando oponente iniciar a partida...");
+    }
+});
+
+// socket.on("receber-dados-jogo", (dados) => {
+//     numerosDisponiveis = dados.numeros;
+//     numeroAlvo = dados.alvo;
+//     modoSelecionadoCompleto = dados.modo;
+//     modoSelecionadoBase = "1x1";
+
+//     renderizarNumeros();
+//     document.getElementById("alvo").textContent = numeroAlvo;
+// });
+
+function enviarDadosParaOponente(inicioJogo) {
+    if (!salaId || !modo1x1Ativo) return;
+
+    socket.emit("enviar-dados-jogo", {
+        salaId,
+        dados: {
+            numeros: numerosDisponiveis,
+            alvo: numeroAlvo,
+            modo: modoSelecionadoCompleto,
+            dificuldade: document.getElementById("dificuldade").value,
+            modoJogo: document.getElementById("modoJogo").value,
+            maximosorteado: document.getElementById("maximosorteado").value,
+            inicio: inicioJogo,
+            totalSolucoes: todasSolucoes
+        }
+    });
+}
+
+
+
+socket.on("receber-dados-jogo", (dados) => {
+    numerosDisponiveis = dados.numeros;
+    numeroAlvo = dados.alvo;
+    modoSelecionadoCompleto = dados.modo;
+    modoSelecionadoBase = dados.modo.split('-')[0];
+    tempoLimiteSegundos = parseInt(dados.modo.split('-')[1]) * 60 || 0;
+    todasSolucoes = dados.totalSolucoes
+
+
+
+    if (dados.inicio) {
+        iniciarCronometro();
+
+        document.getElementById("modoJogo").disabled = true;
+        document.getElementById("dificuldade").disabled = true;
+        document.getElementById("maximosorteado").disabled = true;
+    }
+    document.getElementById("dificuldade").value = dados.dificuldade;
+    document.getElementById("maximosorteado").value = dados.maximosorteado;
+    document.getElementById("modoJogo").value = dados.modoJogo;
+
+    operacaoAtual = "";
+    atualizarOperacao();
+    document.getElementById("resultado").textContent = "?";
+    document.getElementById("resposta-correta").textContent = "";
+    document.getElementById("acertos-unicos").innerHTML = "";
+    document.getElementById("todas-solucoes")?.remove();
+    document.getElementById("botao-solucoes")?.remove();
+    document.getElementById("botao-resetar")?.remove();
+
+    document.getElementById("pontuacao").textContent = `Você: ${pontuacao} | Adversário: ${pontuacaoOutro}`;
+
+
+    expCorretasRespondidas.clear();
+
+    renderizarNumeros();
+    atualizarContadorSolucoes();
+    document.getElementById("alvo").textContent = numeroAlvo;
+});
+
+// Ajuste no calcular()
+const calcularOriginal = calcular;
+calcular = function () {
+    const pontuacaoAntes = pontuacao;
+    calcularOriginal();
+    console.log(modo1x1Ativo, pontuacao, pontuacaoAntes)
+    if (modo1x1Ativo && pontuacao != pontuacaoAntes) {
+        console.log("emitiu")
+        socket.emit("atualizar-pontuacao", {
+            salaId,
+            jogador: socket.id,
+            pontos: pontuacao
+        });
+    }
+};
 
 
 
@@ -86,6 +281,17 @@ function sortearNumeros() {
     } else {
         removerBotaoPular();
     }
+    if (modo1x1Ativo && ehHost) {
+
+        document.getElementById("todas-solucoes")?.remove();
+        document.getElementById("botao-solucoes")?.remove();
+        document.getElementById("botao-resetar")?.remove();
+        document.getElementById("pontuacao").textContent = `Você: ${pontuacao} | Adversário: ${pontuacaoOutro}`;
+        removerBotaoPular();
+        removerBotaoDesistir();
+        enviarDadosParaOponente(true);
+    }
+
 }
 
 function sorteiaNovoNumero() {
@@ -233,7 +439,7 @@ function calcular() {
             atualizarPontuacao(1);
             feedbackCorreto();
             document.getElementById("operacao").textContent = "";
-            // ...
+
             atualizarContadorSolucoes();
 
 
@@ -242,7 +448,10 @@ function calcular() {
             // modoSelecionadoBase = modoRaw.split("-")[0];
 
             // Se for modo de speedrun, e acertar, passa para a próxima
-            if (modoSelecionadoBase === "speedrun") {
+            if (modo1x1Ativo && modoSelecionadoBase === "speedrun") {
+                socket.emit("solicitar-novo-desafio", { salaId });
+                document.getElementById("pontuacao").textContent = `Você: ${pontuacao} | Adversário: ${pontuacaoOutro}`;
+            } else if (modoSelecionadoBase === "speedrun") {
                 sorteiaNovoNumero();
             }
         } else {
@@ -254,7 +463,20 @@ function calcular() {
         document.getElementById("resultado").textContent = "Erro";
     }
 }
+socket.on("pontuacao-atualizada", ({ jogador, pontos }) => {
+    console.log(jogador)
+    if (jogador !== socket.id) {
+        pontuacaoOutro = pontos;
+        document.getElementById("pontuacao").textContent = `Você: ${pontuacao} | Adversário: ${pontuacaoOutro}`;
+    }
+});
 
+socket.on("sortear-novo-desafio", (salaIdRecebido) => {
+    if (salaIdRecebido === salaId) {
+        sorteiaNovoNumero();
+        enviarDadosParaOponente(false);
+    }
+});
 
 
 function gerarOperadores(ops, tamanho) {
@@ -569,6 +791,9 @@ function adicionarBotaoPular() {
     btn.className = "btn btn-secondary";
     btn.onclick = () => {
         sorteiaNovoNumero();
+        if (modo1x1Ativo && ehHost) {
+            enviarDadosParaOponente(false);
+        }
     };
 
     // Inserir dentro do container controles, ao lado do sortear

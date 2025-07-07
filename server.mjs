@@ -471,10 +471,13 @@ io.on("connection", (socket) => {
     if (sala && sala.jogadores.length === 1) {
       sala.jogadores.push(socket.id);
       socket.join(salaId);
-      callback({ sucesso: true });
+      callback({ sucesso: true, hostId: sala.jogadores[0] });
 
-      // Notifica os dois jogadores que podem começar
-      io.to(salaId).emit("sala-pronta");
+      // envia para os dois jogadores
+      io.to(salaId).emit("sala-pronta", {
+        hostId: sala.jogadores[0],
+        jogadorIds: sala.jogadores
+      });
     } else {
       callback({ sucesso: false, msg: "Sala inválida ou cheia." });
     }
@@ -493,6 +496,16 @@ io.on("connection", (socket) => {
     socket.leave(salaId);
     if (salas[salaId]) delete salas[salaId];
   });
+
+  socket.on("solicitar-novo-desafio", ({ salaId }) => {
+    // Apenas o servidor decide quem sorteia (o primeiro jogador da sala = host)
+    const sala = salas[salaId];
+    if (!sala) return;
+
+    const hostId = sala.jogadores[0];
+    io.to(hostId).emit("sortear-novo-desafio", salaId);
+  });
+
 });
 
 
