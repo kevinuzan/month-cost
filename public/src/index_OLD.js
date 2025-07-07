@@ -441,11 +441,6 @@ function calcular() {
             document.getElementById("operacao").textContent = "";
 
             atualizarContadorSolucoes();
-            registrarJogada({
-                expressao: operacaoAtual,
-                resultado: numeroAlvo,
-                correto: true
-            });
 
 
             // O modo já é pego no sortearNumeros e guardado em modoSelecionadoBase
@@ -463,12 +458,6 @@ function calcular() {
             document.getElementById("resposta-correta").textContent = "❌ Erro.";
             atualizarPontuacao(-1);
             feedbackErro();
-            registrarJogada({
-                expressao: operacaoAtual,
-                resultado: total,
-                correto: false
-            });
-
         }
     } catch (e) {
         document.getElementById("resultado").textContent = "Erro";
@@ -724,9 +713,6 @@ function encerrarJogo() {
     document.getElementById("sortear").disabled = false;
     removerBotaoDesistir();
     removerBotaoPular();
-    if (sessaoAtual && sessaoAtual.jogadas.length > 0) {
-        enviarSessaoParaServidor();
-    }
 }
 
 async function mostrarMensagemFinal() {
@@ -1023,122 +1009,3 @@ async function insertRanking(userId, nome, pontuacao, modoCompleto) {
     var result = await fetchGet(`/insertPontuacao?name=${encodeURIComponent(dadosToSend)}`);
     // console.log("Resposta do insertRanking:", result);
 }
-let sessaoAtual = null;
-
-function iniciarNovaSessao() {
-
-    var usuario = localStorage.getItem('currentUserId');
-    sessaoAtual = {
-        id: crypto.randomUUID(),
-        usuario,
-        modo: modoSelecionadoCompleto,
-        dificuldade: document.getElementById("dificuldade").value,
-        numeros: [...numerosDisponiveis],
-        alvoInicial: numeroAlvo,
-        jogadas: []
-    };
-}
-
-function registrarJogada({ expressao, resultado, correto }) {
-    if (!sessaoAtual) iniciarNovaSessao();
-
-    const jogada = {
-        numeros: [...numerosDisponiveis],     // NOVO
-        expressao,
-        resultado,
-        correto,
-        alvo: numeroAlvo,
-        tempoRestante,
-        pontuacaoAtual: pontuacao
-    };
-
-    sessaoAtual.jogadas.push(jogada);
-}
-
-
-async function enviarSessaoParaServidor() {
-    try {
-        const response = await fetch("/salvar-sessao", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(sessaoAtual)
-        });
-
-        if (!response.ok) {
-            throw new Error("Erro ao salvar sessão");
-        }
-
-        console.log("Sessão salva com sucesso!");
-    } catch (err) {
-        console.error("Falha ao enviar sessão:", err);
-    }
-}
-
-
-
-async function mostrarHistoricoModal() {
-    const container = document.getElementById("historico-content");
-    container.innerHTML = "<p class='text-muted'>Carregando...</p>";
-
-    const usuario = localStorage.getItem("currentUserId");
-    if (!usuario) {
-        container.innerHTML = "<p class='text-warning'>Você precisa estar logado para ver seu histórico.</p>";
-        return;
-    }
-
-    try {
-        const res = await fetch(`/sessoes?usuario=${encodeURIComponent(usuario)}`);
-        const historico = await res.json();
-
-        container.innerHTML = "";
-
-        if (historico.length === 0) {
-            container.innerHTML = "<p class='text-muted'>Nenhuma sessão registrada ainda.</p>";
-            return;
-        }
-
-        historico.forEach(sessao => {
-            const data = new Date(sessao.data_completa);
-            console.log(sessao.data_completa)
-            const titulo = `${sessao.modo} ${sessao.dificuldade} ${sessao.data_completa}`;
-
-            const divSessao = document.createElement("div");
-            divSessao.className = "border rounded p-3 mb-3 bg-light";
-
-            const botao = document.createElement("button");
-            botao.className = "btn btn-sm btn-outline-secondary mb-2";
-            botao.textContent = "Mostrar jogadas";
-
-            const detalhes = document.createElement("div");
-            detalhes.style.display = "none";
-
-            botao.addEventListener("click", () => {
-                detalhes.style.display = detalhes.style.display === "none" ? "block" : "none";
-            });
-
-            let html = `<ul>`;
-            sessao.jogadas.forEach(jogada => {
-                html += `<li>${jogada.correto ? "✅":"❌"}
-                          <span class="text-muted">[${JSON.parse(jogada.numeros).join(", ")}] ➔ alvo ${jogada.alvo}</span><br>
-                          ${jogada.expressao} = ${jogada.resultado}
-                        </li>`;
-
-            });
-            html += `</ul>`;
-            detalhes.innerHTML = html;
-
-            divSessao.innerHTML = `<h6>${titulo}</h6>`;
-            divSessao.appendChild(botao);
-            divSessao.appendChild(detalhes);
-            container.appendChild(divSessao);
-        });
-
-        const modal = new bootstrap.Modal(document.getElementById("historicoModal"));
-        modal.show();
-
-    } catch (err) {
-        console.error("Erro ao buscar sessões:", err);
-        container.innerHTML = "<p class='text-danger'>Erro ao carregar sessões.</p>";
-    }
-}
-

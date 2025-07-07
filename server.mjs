@@ -336,6 +336,84 @@ app.get('/getUserScores', async (req, res) => {
   }
 });
 
+app.post('/salvar-sessao', async (req, res) => {
+  try {
+    const { id, usuario, modo, dificuldade, numeros, alvoInicial, jogadas } = req.body;
+    const hoje = new Date().toISOString().split('.')[0].replace('T', ' - ');
+    await pgClient.query(`
+      INSERT INTO sessoes (id, usuario, modo, dificuldade, numeros, alvo_inicial, data, data_completa)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `, [id, usuario, modo, dificuldade, JSON.stringify(numeros), alvoInicial, hoje, hoje]);
+
+    for (const jogada of jogadas) {
+      await pgClient.query(`
+    INSERT INTO jogadas
+      (sessao_id, numeros, expressao, resultado, correto,
+       alvo, tempo_restante, pontuacao)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+  `, [
+        id,
+        JSON.stringify(jogada.numeros),   // NOVO
+        jogada.expressao,
+        jogada.resultado,
+        jogada.correto,
+        jogada.alvo,
+        jogada.tempoRestante,
+        jogada.pontuacaoAtual
+      ]);
+    }
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Erro ao salvar sessão:", error);
+    res.status(500).send("Erro ao salvar sessão");
+  }
+});
+
+app.get("/sessoes", async (req, res) => {
+  try {
+    const { usuario } = req.query;
+
+    if (!usuario) {
+      return res.status(400).send("Usuário não informado.");
+    }
+
+    const { rows: sessoes } = await pgClient.query(`
+      SELECT
+        s.id,
+        s.usuario,
+        s.modo,
+        s.dificuldade,
+        s.numeros,
+        s.alvo_inicial,
+        s.data,
+        s.data_completa,
+        json_agg(
+          json_build_object(
+            'numeros', j.numeros,
+            'expressao', j.expressao,
+            'resultado', j.resultado,
+            'correto', j.correto,
+            'alvo', j.alvo,
+            'tempoRestante', j.tempo_restante,
+            'pontuacaoAtual', j.pontuacao
+          )
+        ) AS jogadas
+      FROM sessoes s
+      LEFT JOIN jogadas j ON s.id = j.sessao_id
+      WHERE s.usuario = $1
+      GROUP BY s.id
+      ORDER BY s.data DESC
+    `, [usuario]);
+
+    res.json(sessoes);
+  } catch (err) {
+    console.error("Erro ao buscar sessões:", err);
+    res.status(500).send("Erro ao buscar sessões");
+  }
+});
+
+
 
 app.get('/insertPontuacao', async function (req, res) {
   try {
@@ -432,7 +510,7 @@ app.get('/insertPontuacao', async function (req, res) {
 // app.get('/deleteTable', async function (req, res) {
 //   try {
 //     await pgClient.query(
-//       'DROP TABLE ranking_table',
+//       'DROP TABLE sessoes',
 //     );
 //     res.json({ sucesso: true });
 //   } catch (e) {
